@@ -94,7 +94,16 @@ const toEmergency = (r: Row): EmergencyProfile & { accessToken?: string | null }
   emergencyContact: { name: r.contact_name, phone: r.contact_phone, relation: r.contact_relation },
 });
 
-export type RegisterInput = User & { password: string };
+type ConsentUpsertRow = {
+  patient_id: string;
+  doctor_id: string;
+  access_type: string;
+  status: 'granted' | 'revoked';
+  granted_at?: string;
+  revoked_at: string | null;
+};
+
+export type RegisterInput =User & { password: string };
 
 interface AppState {
   ready: boolean;
@@ -399,11 +408,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const upsertConsent = async (c: ConsentRecord) => {
     if (!currentUser) return;
     const now = new Date().toISOString();
-    const row = {
+    // One explicit shape: a conditional spread would produce a union of two
+    // object types, which supabase-js's upsert typing rejects. granted_at is
+    // omitted on revoke so the original grant time is kept.
+    const row: ConsentUpsertRow = {
       patient_id: currentUser.id, doctor_id: c.doctorId, access_type: c.accessType || 'Full Records',
       status: c.status === 'granted' ? 'granted' : 'revoked',
-      ...(c.status === 'granted' ? { granted_at: now, revoked_at: null } : { revoked_at: now }),
+      revoked_at: c.status === 'granted' ? null : now,
     };
+    if (c.status === 'granted') row.granted_at = now;
     const { error: err } = await supabase.from('consents').upsert(row, { onConflict: 'patient_id,doctor_id' });
     if (err) { fail(`Could not update consent: ${err.message}`); return; }
     await loadAll(currentUser.id);

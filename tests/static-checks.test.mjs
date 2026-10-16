@@ -12,7 +12,8 @@ const src = walk('src').filter((f) => /\.(ts|tsx)$/.test(f)).map((f) => [f, read
 
 test('frontend never references server-only secrets', () => {
   for (const [f, s] of src) {
-    assert.ok(!/SERVICE_ROLE|ANTHROPIC_API_KEY|sk-ant-/.test(s), `${f} references a server secret`);
+    // Flags reading server env vars or embedding key material — not UI text naming a variable.
+    assert.ok(!/SERVICE_ROLE|sk-ant-|process\.env|import\.meta\.env\.(?!VITE_)/.test(s), `${f} references a server secret`);
   }
 });
 
