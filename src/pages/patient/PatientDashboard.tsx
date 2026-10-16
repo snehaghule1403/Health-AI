@@ -103,12 +103,6 @@ export default function PatientDashboard() {
         </p>
       </div>
 
-      {/* Disclaimer */}
-      <div className="disclaimer" style={{ marginBottom: '1.5rem' }}>
-        <AlertCircle size={16} style={{ flexShrink: 0, marginTop: 1 }} />
-        This application is an academic prototype. AI-generated information is for educational/informational purposes only and does not replace professional medical advice.
-      </div>
-
       {/* Stat Cards */}
       <div className="grid-4" style={{ marginBottom: '2rem' }}>
         {statCards.map((card, i) => (
