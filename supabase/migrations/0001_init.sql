@@ -1,7 +1,8 @@
 -- HealthAI — initial schema, RLS and storage
 -- Apply with: supabase db push   (or paste into the Supabase SQL editor)
 
-create extension if not exists pgcrypto;
+-- Supabase pre-installs pgcrypto in the "extensions" schema; this is a no-op there.
+create extension if not exists pgcrypto with schema extensions;
 
 -- ─── Profiles ────────────────────────────────────────────────────────────────
 create table public.profiles (
@@ -56,7 +57,7 @@ create trigger on_auth_user_created after insert on auth.users
 
 -- Users may never change their own role / verification.
 create or replace function public.protect_profile_fields() returns trigger
-language plpgsql as $$
+language plpgsql set search_path = public as $$
 begin
   if auth.role() = 'authenticated' then
     new.role := old.role;
@@ -329,7 +330,7 @@ create policy medical_files_doctor_read on storage.objects for select to authent
 -- and the patient can rotate it (old QR stops working) or disable it.
 create or replace function public.regenerate_emergency_token(p_enable boolean default true)
 returns text language plpgsql security definer set search_path = public as $$
-declare t text := case when p_enable then encode(gen_random_bytes(32), 'hex') else null end;
+declare t text := case when p_enable then encode(extensions.gen_random_bytes(32), 'hex') else null end;
 begin
   if auth.uid() is null then raise exception 'not authenticated'; end if;
   insert into emergency_profiles (patient_id, access_token) values (auth.uid(), t)
