@@ -50,3 +50,12 @@ test('.env files are git-ignored', () => {
   assert.match(gi, /^\.env$/m);
   assert.match(gi, /^\.env\.local$/m);
 });
+
+test('emergency QR links use the public site URL, not the current origin', () => {
+  const page = readFileSync('src/pages/patient/EmergencyProfile.tsx', 'utf8');
+  assert.match(page, /\$\{PUBLIC_SITE_URL\}\/emergency\//);
+  assert.ok(!/window\.location\.origin\}\/emergency/.test(page), 'QR must not use window.location.origin');
+  const site = readFileSync('src/lib/siteUrl.ts', 'utf8');
+  const def = site.match(/DEFAULT_PUBLIC_SITE_URL = '([^']+)'/)?.[1];
+  assert.equal(def, 'https://health-ai-omega-three.vercel.app', 'default must be the public production domain');
+});

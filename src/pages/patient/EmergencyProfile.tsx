@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { AlertCircle, Phone, Heart, Shield, Pill, QrCode, RefreshCw, Save } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { PUBLIC_SITE_URL, isOffPublicSite } from '../../lib/siteUrl';
 
 const BLOOD_GROUPS = ['', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 const splitList = (s: string) => s.split(',').map(x => x.trim()).filter(Boolean).slice(0, 30);
@@ -34,7 +35,8 @@ export default function EmergencyProfile() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [saved?.patientId]);
 
-  const link = saved?.accessToken ? `${window.location.origin}/emergency/${saved.accessToken}` : '';
+  // Always the public production domain: preview/localhost URLs need a Vercel login or don't resolve.
+  const link = saved?.accessToken ? `${PUBLIC_SITE_URL}/emergency/${saved.accessToken}` : '';
 
   useEffect(() => {
     if (!link) { setQrUrl(''); return; }
@@ -159,6 +161,11 @@ export default function EmergencyProfile() {
                   <Shield size={15} /> {qrBusy ? 'Generating…' : 'Enable emergency QR'}
                 </button>
               </>
+            )}
+            {isOffPublicSite() && (
+              <div className="alert alert-info" style={{ marginTop: '1rem', textAlign: 'left', fontSize: '0.75rem' }}>
+                You are on a test or preview site. The QR still points to {PUBLIC_SITE_URL}, which only works once this version is live there.
+              </div>
             )}
             <div style={{ background: '#f9fafb', borderRadius: 8, padding: '0.75rem', fontSize: '0.75rem', color: '#4b5563', marginTop: '1.25rem', textAlign: 'left', lineHeight: 1.6 }}>
               The QR contains only a link with a long random code. Anyone who scans it can see the emergency fields above, without signing in — that is intentional for first responders. Regenerate or disable it at any time if the QR is lost.
