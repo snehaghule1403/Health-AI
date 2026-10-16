@@ -21,7 +21,9 @@ export default function RegisterPage() {
   const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm(prev => ({ ...prev, [field]: e.target.value }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [notice, setNotice] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -29,15 +31,23 @@ export default function RegisterPage() {
       setError('Passwords do not match.');
       return;
     }
-    if (form.password.length < 6) {
-      setError('Password must be at least 6 characters.');
+    if (form.password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
+    if (!form.name.trim()) {
+      setError('Please enter your full name.');
+      return;
+    }
+    if (!isPatient && !form.medicalRegistrationId.trim()) {
+      setError('Medical registration ID is required for doctors.');
       return;
     }
 
     setLoading(true);
-    setTimeout(() => {
+    {
       const user: User = {
-        id: `${role}-${Date.now()}`,
+        id: '',
         role: role!,
         name: form.name,
         email: form.email,
@@ -53,14 +63,15 @@ export default function RegisterPage() {
         }),
       };
 
-      const ok = register(user, form.password);
-      if (ok) {
-        navigate(`/login/${role}`);
-      } else {
-        setError('Email already registered. Please login.');
-      }
+      const res = await register({ ...user, password: form.password });
       setLoading(false);
-    }, 600);
+      if (!res.ok) return setError(res.error ?? 'Registration failed.');
+      if (res.needsConfirmation) {
+        setNotice('Account created. Check your email to confirm your address, then sign in.');
+        return;
+      }
+      navigate(isPatient ? '/patient/dashboard' : '/doctor/dashboard');
+    }
   };
 
   return (
@@ -98,7 +109,11 @@ export default function RegisterPage() {
               </p>
             </div>
 
-            {error && <div className="alert alert-danger">{error}</div>}
+            {error && <div className="alert alert-danger" role="alert">{error}</div>}
+            {notice && <div className="alert alert-success" role="status">{notice}</div>}
+            {!isPatient && (
+              <div className="alert alert-info">Doctor accounts must be verified by an administrator before any patient data becomes visible.</div>
+            )}
           </div>
 
           <form onSubmit={handleSubmit} style={{ padding: '0 2rem 2rem' }}>
@@ -175,7 +190,7 @@ export default function RegisterPage() {
             <div className="form-row">
               <div className="form-group">
                 <label className="form-label">Password *</label>
-                <input type="password" value={form.password} onChange={set('password')} placeholder="Minimum 6 characters" required />
+                <input type="password" value={form.password} onChange={set('password')} placeholder="Minimum 8 characters" autoComplete="new-password" required />
               </div>
               <div className="form-group">
                 <label className="form-label">Confirm Password *</label>

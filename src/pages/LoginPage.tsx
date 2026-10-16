@@ -6,7 +6,7 @@ import { useApp } from '../context/AppContext';
 export default function LoginPage() {
   const { role } = useParams<{ role: 'patient' | 'doctor' }>();
   const navigate = useNavigate();
-  const { login } = useApp();
+  const { login, resetPassword } = useApp();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,26 +16,27 @@ export default function LoginPage() {
 
   const isPatient = role === 'patient';
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [info, setInfo] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setInfo('');
     setLoading(true);
-
-    setTimeout(() => {
-      const ok = login(email.trim(), password);
-      if (ok) {
-        navigate(isPatient ? '/patient/dashboard' : '/doctor/dashboard');
-      } else {
-        setError('Invalid email or password. Try the demo credentials below.');
-      }
-      setLoading(false);
-    }, 600);
+    const res = await login(email.trim(), password);
+    setLoading(false);
+    if (!res.ok) return setError(res.error ?? 'Login failed.');
+    // Route by the role stored in the database, not the login page used.
+    navigate(res.role === 'doctor' ? '/doctor/dashboard' : '/patient/dashboard');
   };
 
-  const fillDemo = () => {
-    setEmail(isPatient ? 'patient@healthai.demo' : 'doctor@healthai.demo');
-    setPassword(isPatient ? 'patient123' : 'doctor123');
+  const handleForgot = async () => {
     setError('');
+    setInfo('');
+    if (!email.trim()) return setError('Enter your email address first, then click "Forgot password".');
+    const res = await resetPassword(email.trim());
+    if (res.ok) setInfo('If an account exists for that email, a password reset link has been sent.');
+    else setError(res.error ?? 'Could not send reset email.');
   };
 
   return (
@@ -77,24 +78,14 @@ export default function LoginPage() {
               </p>
             </div>
 
-            {/* Demo banner */}
-            <div style={{
-              background: isPatient ? '#dbeafe' : '#f0fdf4',
-              border: `1px solid ${isPatient ? '#93c5fd' : '#86efac'}`,
-              borderRadius: 10, padding: '0.85rem 1rem', marginBottom: '1.25rem',
-              cursor: 'pointer'
-            }} onClick={fillDemo}>
-              <p style={{ fontSize: '0.8rem', fontWeight: 600, color: isPatient ? '#1e40af' : '#166534', marginBottom: '0.25rem' }}>
-                🚀 Click to auto-fill demo credentials
-              </p>
-              <p style={{ fontSize: '0.78rem', color: isPatient ? '#3b82f6' : '#22c55e' }}>
-                {isPatient ? 'patient@healthai.demo / patient123' : 'doctor@healthai.demo / doctor123'}
-              </p>
-            </div>
-
             {error && (
-              <div className="alert alert-danger" style={{ marginBottom: '1rem' }}>
+              <div className="alert alert-danger" role="alert" style={{ marginBottom: '1rem' }}>
                 {error}
+              </div>
+            )}
+            {info && (
+              <div className="alert alert-info" role="status" style={{ marginBottom: '1rem' }}>
+                {info}
               </div>
             )}
           </div>
@@ -106,7 +97,8 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder={isPatient ? 'patient@healthai.demo' : 'doctor@healthai.demo'}
+                placeholder="you@example.com"
+                autoComplete="email"
                 required
               />
             </div>
@@ -118,6 +110,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="Enter your password"
+                autoComplete="current-password"
                 required
                 style={{ paddingRight: '2.75rem' }}
               />
@@ -130,6 +123,13 @@ export default function LoginPage() {
                 }}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+
+            <div style={{ textAlign: 'right', marginTop: '-0.5rem', marginBottom: '0.5rem' }}>
+              <button type="button" onClick={handleForgot}
+                style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '0.8rem' }}>
+                Forgot password?
               </button>
             </div>
 
@@ -191,7 +191,7 @@ export default function LoginPage() {
         </div>
 
         <p style={{ textAlign: 'center', marginTop: '1.25rem', fontSize: '0.75rem', color: '#9ca3af' }}>
-          Academic prototype — not a real medical application
+          Educational project — not a substitute for professional medical care
         </p>
       </div>
     </div>

@@ -8,6 +8,8 @@ export default defineConfig({
   base: '/',
   build: {
     outDir: 'dist',
+    // pdf.js v4 uses top-level await
+    target: 'es2022',
     sourcemap: false,
     // Increase chunk size warning limit for a larger SPA
     chunkSizeWarningLimit: 1000,
@@ -18,10 +20,12 @@ export default defineConfig({
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           'chart-vendor': ['recharts'],
           'icon-vendor': ['lucide-react'],
+          'supabase-vendor': ['@supabase/supabase-js'],
         },
       },
     },
   },
+  optimizeDeps: { esbuildOptions: { target: 'es2022' } },
   server: {
     port: 5173,
     // Do not open browser automatically in CI

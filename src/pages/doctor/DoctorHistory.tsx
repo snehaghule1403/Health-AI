@@ -1,9 +1,10 @@
 import { Lock, Users } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { DEMO_EMERGENCY } from '../../data/demoData';
+import { useState } from 'react';
 
 export default function DoctorHistory() {
-  const { currentUser, users, consents, records, medicines, vaccines } = useApp();
+  const { currentUser, users, consents, records, medicines, vaccines, emergencyProfiles } = useApp();
+  const [selectedId, setSelectedId] = useState('');
 
   const grantedConsents = consents.filter(
     c => c.doctorId === currentUser?.id && c.status === 'granted'
@@ -31,7 +32,8 @@ export default function DoctorHistory() {
     );
   }
 
-  const patient = authorizedPatients[0];
+  const patient = authorizedPatients.find(p => p.id === selectedId) ?? authorizedPatients[0];
+  const emergency = emergencyProfiles.find(e => e.patientId === patient.id);
   const patientRecords = records.filter(r => r.patientId === patient.id);
   const patientMeds = medicines.filter(m => m.patientId === patient.id);
   const patientVaccines = vaccines.filter(v => v.patientId === patient.id);
@@ -67,6 +69,12 @@ export default function DoctorHistory() {
           <h1>Medical History</h1>
           <p>Patient medical timeline and history</p>
         </div>
+        <div>
+          <label htmlFor="dh-patient" className="sr-only">Patient</label>
+          <select id="dh-patient" value={patient.id} onChange={e => setSelectedId(e.target.value)} style={{ minWidth: 200 }}>
+            {authorizedPatients.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+        </div>
       </div>
 
       {/* Patient summary */}
@@ -79,7 +87,7 @@ export default function DoctorHistory() {
             <div>
               <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1f2937' }}>{patient.name}</h2>
               <p style={{ fontSize: '0.82rem', color: '#6b7280' }}>
-                Blood Group: <strong>{patient.bloodGroup ?? DEMO_EMERGENCY.bloodGroup}</strong>
+                Blood Group: <strong>{patient.bloodGroup || emergency?.bloodGroup || 'N/A'}</strong>
                 {patient.dateOfBirth && ` · Age: ${new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear()}`}
                 {patient.gender && ` · ${patient.gender}`}
               </p>
@@ -107,7 +115,7 @@ export default function DoctorHistory() {
         <div className="card" style={{ padding: '1.25rem' }}>
           <h3 style={{ fontWeight: 600, color: '#dc2626', marginBottom: '0.75rem', fontSize: '0.9rem' }}>⚠️ Known Allergies</h3>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-            {DEMO_EMERGENCY.allergies.map((a, i) => (
+            {(emergency?.allergies.length ? emergency.allergies : ['None recorded']).map((a, i) => (
               <span key={i} className="badge badge-red">{a}</span>
             ))}
           </div>
@@ -115,7 +123,7 @@ export default function DoctorHistory() {
         <div className="card" style={{ padding: '1.25rem' }}>
           <h3 style={{ fontWeight: 600, color: '#ea580c', marginBottom: '0.75rem', fontSize: '0.9rem' }}>📋 Medical Conditions</h3>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-            {DEMO_EMERGENCY.conditions.map((c, i) => (
+            {(emergency?.conditions.length ? emergency.conditions : ['None recorded']).map((c, i) => (
               <span key={i} className="badge badge-orange">{c}</span>
             ))}
           </div>

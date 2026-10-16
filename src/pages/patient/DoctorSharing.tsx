@@ -12,59 +12,39 @@ export default function DoctorSharing() {
 
   const patientConsents = consents.filter(c => c.patientId === currentUser?.id);
 
-  const handleGrant = (consent: ConsentRecord) => {
-    const now = new Date().toISOString();
-    updateConsent({
-      ...consent,
-      status: 'granted',
-      grantedAt: now,
-      revokedAt: undefined,
-      history: [
-        ...consent.history,
-        { action: 'Access Granted', timestamp: now },
-      ],
-    });
+  const [busy, setBusy] = useState(false);
+
+  // Only admin-verified doctors are returned by the database.
+  const q = reqForm.doctorEmail.trim().toLowerCase();
+  const doctorMatches = users
+    .filter(u => u.role === 'doctor' && u.doctorVerified && !patientConsents.some(c => c.doctorId === u.id))
+    .filter(u => !q || [u.name, u.email, u.hospital, u.specialization].some(s => s?.toLowerCase().includes(q)))
+    .slice(0, 20);
+
+  // Consent is enforced by the database (RLS); the backend writes the audit log.
+  const handleGrant = async (consent: ConsentRecord) => {
+    setBusy(true);
+    await updateConsent({ ...consent, status: 'granted' });
+    setBusy(false);
   };
 
-  const handleRevoke = (consent: ConsentRecord) => {
-    const now = new Date().toISOString();
-    updateConsent({
-      ...consent,
-      status: 'revoked',
-      revokedAt: now,
-      history: [
-        ...consent.history,
-        { action: 'Access Revoked', timestamp: now },
-      ],
-    });
+  const handleRevoke = async (consent: ConsentRecord) => {
+    if (!confirm(`Revoke ${consent.doctorName}'s access? They will immediately lose access to your records.`)) return;
+    setBusy(true);
+    await updateConsent({ ...consent, status: 'revoked' });
+    setBusy(false);
   };
 
-  const handleRequest = () => {
+  const handleRequest = async (doctorId: string) => {
     setReqError('');
-    const doctor = users.find(u => u.email === reqForm.doctorEmail && u.role === 'doctor');
-    if (!doctor) {
-      setReqError('Doctor not found. Use: doctor@healthai.demo');
-      return;
-    }
-    const existing = patientConsents.find(c => c.doctorId === doctor.id);
-    if (existing) {
-      setReqError('You already have a consent record with this doctor.');
-      return;
-    }
-    const newConsent: ConsentRecord = {
-      id: `con-${Date.now()}`,
-      patientId: currentUser!.id,
-      doctorId: doctor.id,
-      doctorName: doctor.name,
-      hospital: doctor.hospital ?? 'Unknown',
-      accessType: 'Full Medical Records',
-      status: 'granted',
-      grantedAt: new Date().toISOString(),
-      history: [
-        { action: 'Access Granted', timestamp: new Date().toISOString() },
-      ],
-    };
-    addConsent(newConsent);
+    const doctor = users.find(u => u.id === doctorId && u.role === 'doctor');
+    if (!doctor) return setReqError('Please choose a doctor from the list.');
+    setBusy(true);
+    await addConsent({
+      id: '', patientId: currentUser!.id, doctorId: doctor.id, doctorName: doctor.name,
+      hospital: doctor.hospital ?? '', accessType: 'Full Records', status: 'granted', history: [],
+    });
+    setBusy(false);
     setReqSuccess(`Access granted to ${doctor.name}`);
     setShowRequestForm(false);
     setReqForm({ doctorEmail: '' });
@@ -106,23 +86,28 @@ export default function DoctorSharing() {
             Grant New Doctor Access
           </h3>
           {reqError && <div className="alert alert-danger" style={{ marginBottom: '0.75rem' }}>{reqError}</div>}
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end' }}>
-            <div style={{ flex: 1 }}>
-              <label className="form-label">Doctor Email Address</label>
-              <input
-                value={reqForm.doctorEmail}
-                onChange={e => setReqForm({ doctorEmail: e.target.value })}
-                placeholder="doctor@healthai.demo"
-              />
-              <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.3rem' }}>
-                Demo: Use doctor@healthai.demo
-              </p>
-            </div>
-            <button className="btn btn-success" onClick={handleRequest}>
-              <CheckCircle size={14} /> Grant Access
-            </button>
-            <button className="btn btn-outline" onClick={() => setShowRequestForm(false)}>Cancel</button>
+          <label className="form-label" htmlFor="doc-search">Search verified doctors</label>
+          <input
+            id="doc-search"
+            value={reqForm.doctorEmail}
+            onChange={e => setReqForm({ doctorEmail: e.target.value })}
+            placeholder="Name, email, hospital or specialization"
+          />
+          <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: 320, overflowY: 'auto' }}>
+            {doctorMatches.length === 0 && <p style={{ fontSize: '0.85rem', color: '#9ca3af' }}>No matching verified doctors.</p>}
+            {doctorMatches.map(d => (
+              <div key={d.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.75rem', border: '1px solid #e5e7eb', borderRadius: 8, flexWrap: 'wrap' }}>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{d.name}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>{[d.specialization, d.hospital].filter(Boolean).join(' · ') || d.email}</div>
+                </div>
+                <button className="btn btn-success btn-sm" disabled={busy} onClick={() => handleRequest(d.id)}>
+                  <CheckCircle size={13} /> Grant Access
+                </button>
+              </div>
+            ))}
           </div>
+          <button className="btn btn-outline" style={{ marginTop: '0.75rem' }} onClick={() => setShowRequestForm(false)}>Cancel</button>
         </div>
       )}
 
@@ -159,12 +144,12 @@ export default function DoctorSharing() {
               {/* Action buttons */}
               <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
                 {consent.status !== 'granted' && (
-                  <button className="btn btn-success btn-sm" onClick={() => handleGrant(consent)}>
+                  <button className="btn btn-success btn-sm" disabled={busy} onClick={() => handleGrant(consent)}>
                     <CheckCircle size={13} /> Grant Access
                   </button>
                 )}
                 {consent.status === 'granted' && (
-                  <button className="btn btn-danger btn-sm" onClick={() => handleRevoke(consent)}>
+                  <button className="btn btn-danger btn-sm" disabled={busy} onClick={() => handleRevoke(consent)}>
                     <XCircle size={13} /> Revoke Access
                   </button>
                 )}
@@ -176,11 +161,11 @@ export default function DoctorSharing() {
                   <History size={12} /> ACCESS HISTORY
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                  {consent.history.slice().reverse().slice(0, 5).map((h, i) => (
+                  {consent.history.slice().reverse().map((h, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.78rem' }}>
                       <div style={{
                         width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
-                        background: h.action.includes('Granted') ? '#16a34a' : h.action.includes('Revoked') ? '#dc2626' : '#6b7280'
+                        background: h.action.includes('granted') ? '#16a34a' : h.action.includes('revoked') ? '#dc2626' : '#6b7280'
                       }} />
                       <span style={{ color: '#374151' }}>{h.action}</span>
                       <span style={{ color: '#9ca3af' }}>

@@ -28,7 +28,7 @@ export default function LandingPage() {
               <Heart size={20} color="white" fill="white" />
             </div>
             <span style={{ fontWeight: 700, fontSize: '1.2rem', color: '#1e3a5f' }}>HealthAI</span>
-            <span className="demo-badge">PROTOTYPE</span>
+            <span className="demo-badge">BETA</span>
           </div>
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button className="btn btn-outline" onClick={() => navigate('/login/patient')}>
@@ -48,7 +48,7 @@ export default function LandingPage() {
       }}>
         <div style={{ maxWidth: 800, margin: '0 auto', textAlign: 'center' }}>
           <div className="demo-badge" style={{ marginBottom: '1.5rem' }}>
-            🎓 Academic Prototype — College Project
+            🎓 Educational Project — Not a medical device
           </div>
           <h1 style={{
             fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800,
@@ -80,7 +80,7 @@ export default function LandingPage() {
             </button>
           </div>
           <p style={{ marginTop: '1.25rem', fontSize: '0.8rem', color: '#9ca3af' }}>
-            Demo: patient@healthai.demo / patient123 &nbsp;|&nbsp; doctor@healthai.demo / doctor123
+            Create a free patient account to get started. Not a substitute for professional medical care.
           </p>
         </div>
       </section>
@@ -278,7 +278,7 @@ export default function LandingPage() {
               { icon: <Lock size={22} />, color: '#2563eb', bg: '#dbeafe', title: 'Role-Based Access', desc: 'Patients and doctors see only what they are authorized to view' },
               { icon: <Shield size={22} />, color: '#16a34a', bg: '#dcfce7', title: 'Consent Control', desc: 'You decide which doctors can access your records and when' },
               { icon: <Star size={22} />, color: '#ea580c', bg: '#ffedd5', title: 'Access Logs', desc: 'Full audit trail of who viewed your records and when' },
-              { icon: <Smartphone size={22} />, color: '#7c3aed', bg: '#ede9fe', title: 'Local Storage', desc: 'Demo data stays on your device — no server transmission' },
+              { icon: <Smartphone size={22} />, color: '#7c3aed', bg: '#ede9fe', title: 'Private by Design', desc: 'Row-level security and private file storage — only you and doctors you approve can see your data' },
             ].map((item, i) => (
               <div key={i} className="card" style={{ padding: '1.25rem', textAlign: 'center' }}>
                 <div style={{
@@ -336,10 +336,10 @@ export default function LandingPage() {
       }}>
         <div style={{ textAlign: 'center', maxWidth: 600, margin: '0 auto' }}>
           <h2 style={{ fontSize: '2rem', fontWeight: 700, color: '#1e3a5f', marginBottom: '0.75rem' }}>
-            Try the Demo
+            Get Started
           </h2>
           <p style={{ color: '#4b5563', marginBottom: '2rem', lineHeight: 1.6 }}>
-            Explore all features using the demo accounts. This prototype was built as an academic project.
+            Create an account to store records, track wellness and share securely with your doctor. Built as an educational project.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button className="btn btn-primary btn-lg" onClick={() => navigate('/login/patient')}>

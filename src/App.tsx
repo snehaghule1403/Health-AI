@@ -6,6 +6,9 @@ import Sidebar from './components/Sidebar';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import EmergencyAccessPage from './pages/EmergencyAccessPage';
+import { supabaseConfigured } from './lib/supabase';
 
 // Patient pages
 import PatientDashboard from './pages/patient/PatientDashboard';
@@ -26,7 +29,8 @@ import DoctorTrends from './pages/doctor/DoctorTrends';
 import DoctorConsent from './pages/doctor/DoctorConsent';
 
 function ProtectedLayout({ requiredRole }: { requiredRole: 'patient' | 'doctor' }) {
-  const { currentUser } = useApp();
+  const { currentUser, ready, error, clearError } = useApp();
+  if (!ready) return <div className="empty-state" role="status" style={{ minHeight: '100vh' }}><p>Loading…</p></div>;
   if (!currentUser) return <Navigate to={`/login/${requiredRole}`} replace />;
   if (currentUser.role !== requiredRole) {
     return <Navigate to={currentUser.role === 'patient' ? '/patient/dashboard' : '/doctor/dashboard'} replace />;
@@ -35,6 +39,17 @@ function ProtectedLayout({ requiredRole }: { requiredRole: 'patient' | 'doctor' 
     <div className="app-layout">
       <Sidebar />
       <main className="main-content">
+        {error && (
+          <div role="alert" className="alert-banner">
+            <span>{error}</span>
+            <button className="btn btn-outline btn-sm" onClick={clearError} aria-label="Dismiss error">Dismiss</button>
+          </div>
+        )}
+        {requiredRole === 'doctor' && !currentUser.doctorVerified && (
+          <div role="status" className="alert-banner alert-info">
+            Your doctor account is awaiting verification. You will not see any patient data until an administrator verifies your registration.
+          </div>
+        )}
         <Routes>
           {requiredRole === 'patient' ? (
             <>
@@ -56,6 +71,7 @@ function ProtectedLayout({ requiredRole }: { requiredRole: 'patient' | 'doctor' 
               <Route path="history" element={<DoctorHistory />} />
               <Route path="trends" element={<DoctorTrends />} />
               <Route path="consent" element={<DoctorConsent />} />
+              <Route path="settings" element={<Settings />} />
               <Route path="*" element={<Navigate to="dashboard" replace />} />
             </>
           )}
@@ -71,6 +87,8 @@ function AppRoutes() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login/:role" element={<LoginPage />} />
       <Route path="/register/:role" element={<RegisterPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/emergency/:token" element={<EmergencyAccessPage />} />
       <Route path="/patient/*" element={<ProtectedLayout requiredRole="patient" />} />
       <Route path="/doctor/*" element={<ProtectedLayout requiredRole="doctor" />} />
       <Route path="*" element={<Navigate to="/" replace />} />
@@ -82,6 +100,11 @@ export default function App() {
   return (
     <AppProvider>
       <BrowserRouter>
+        {!supabaseConfigured && (
+          <div role="alert" className="alert-banner" style={{ margin: 0, borderRadius: 0 }}>
+            Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (see README) — sign-in and data are unavailable.
+          </div>
+        )}
         <AppRoutes />
       </BrowserRouter>
     </AppProvider>

@@ -5,7 +5,7 @@ import {
   TrendingUp, ChevronRight
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { DEMO_TRENDS } from '../../data/demoData';
+
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer
@@ -13,15 +13,19 @@ import {
 
 export default function PatientDashboard() {
   const navigate = useNavigate();
-  const { currentUser, records, medicines, wellness, consents } = useApp();
+  const { currentUser, records, medicines, wellness, consents, vaccines, trendsFor } = useApp();
+  const trendData = currentUser ? trendsFor(currentUser.id).filter(t => t.hemoglobin != null) : [];
 
   const today = new Date().toISOString().split('T')[0];
   const todayWellness = wellness.find(w =>
     w.patientId === currentUser?.id && w.date === today
-  ) ?? wellness[0];
+  );
 
   const patientRecords = records.filter(r => r.patientId === currentUser?.id);
-  const patientMedicines = medicines.filter(m => m.patientId === currentUser?.id);
+  const patientMedicines = medicines.filter(m => m.patientId === currentUser?.id && (!m.endDate || m.endDate >= today));
+  const upcomingVaccines = vaccines.filter(v => v.patientId === currentUser?.id && v.status !== 'completed').length;
+  const waterGoal = currentUser?.waterGoal ?? 8;
+  const latestWeight = wellness.find(w => w.patientId === currentUser?.id && w.weight)?.weight ?? currentUser?.weight;
   const activeConsents = consents.filter(c =>
     c.patientId === currentUser?.id && c.status === 'granted'
   );
@@ -30,9 +34,9 @@ export default function PatientDashboard() {
   const greeting = greetingHour < 12 ? 'Good morning' : greetingHour < 17 ? 'Good afternoon' : 'Good evening';
   const firstName = currentUser?.name.split(' ')[0] ?? 'there';
 
-  const bmi = currentUser?.height && currentUser?.weight
-    ? (currentUser.weight / ((currentUser.height / 100) ** 2)).toFixed(1)
-    : '20.9';
+  const bmi = currentUser?.height && latestWeight
+    ? (latestWeight / ((currentUser.height / 100) ** 2)).toFixed(1)
+    : '—';
 
   const statCards = [
     {
@@ -47,7 +51,7 @@ export default function PatientDashboard() {
     },
     {
       icon: <Droplets size={20} />, iconBg: '#cffafe', iconColor: '#0891b2',
-      label: 'Water Intake', value: `${todayWellness?.waterGlasses ?? 0}/8`, sub: 'glasses today',
+      label: 'Water Intake', value: `${todayWellness?.waterGlasses ?? 0}/${waterGoal}`, sub: 'glasses today',
       onClick: () => navigate('/patient/wellness')
     },
     {
@@ -62,7 +66,7 @@ export default function PatientDashboard() {
     },
     {
       icon: <Scale size={20} />, iconBg: '#fef3c7', iconColor: '#d97706',
-      label: 'BMI', value: bmi, sub: 'Normal range',
+      label: 'BMI', value: bmi, sub: bmi === '—' ? 'Add height & weight' : 'From latest weight',
       onClick: () => navigate('/patient/trends')
     },
     {
@@ -72,7 +76,7 @@ export default function PatientDashboard() {
     },
     {
       icon: <TrendingUp size={20} />, iconBg: '#ffedd5', iconColor: '#ea580c',
-      label: 'Health Score', value: '78%', sub: 'Based on recent data',
+      label: 'Vaccines Due', value: upcomingVaccines, sub: 'upcoming or overdue',
       onClick: () => navigate('/patient/trends')
     },
   ];
@@ -90,7 +94,7 @@ export default function PatientDashboard() {
     <div className="page-container">
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
-        <div className="demo-badge" style={{ marginBottom: '0.5rem' }}>DEMO DATA</div>
+
         <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#1f2937' }}>
           {greeting}, {firstName} 👋
         </h1>
@@ -213,11 +217,11 @@ export default function PatientDashboard() {
         </div>
         <div style={{ padding: '1.5rem' }}>
           <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={DEMO_TRENDS}>
+            <LineChart data={trendData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
               <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#9ca3af' }} />
               <YAxis
-                domain={[11, 13]}
+                domain={['auto', 'auto']}
                 tick={{ fontSize: 12, fill: '#9ca3af' }}
                 unit=" g/dL"
               />

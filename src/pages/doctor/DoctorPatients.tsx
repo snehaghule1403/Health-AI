@@ -1,44 +1,59 @@
-import { useState } from 'react';
-import { Users, FileText, TrendingUp, ChevronRight, Lock, X, Brain, CheckCircle } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Lock, Search, FileText, Eye, X, Brain, Download, Loader, AlertCircle } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import type { HealthRecord } from '../../types';
-import { analyzeReport } from '../../utils/aiUtils';
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
-} from 'recharts';
-import { DEMO_TRENDS } from '../../data/demoData';
+import { apiPost } from '../../lib/api';
+import AIAnalysisView from '../../components/AIAnalysisView';
+import TrendsPanel from '../../components/TrendsPanel';
+
+const PAGE_SIZE = 20;
 
 export default function DoctorPatients() {
-  const { currentUser, users, consents, records, medicines, vaccines } = useApp();
+  const { currentUser, users, consents, records, medicines, vaccines, getFileUrl } = useApp();
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<'records' | 'history' | 'trends'>('records');
   const [viewRecord, setViewRecord] = useState<HealthRecord | null>(null);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [ai, setAi] = useState<{ loading: boolean; error?: string; analysis?: HealthRecord['aiAnalysis'] }>({ loading: false });
 
-  const grantedConsents = consents.filter(
-    c => c.doctorId === currentUser?.id && c.status === 'granted'
-  );
+  // Patients come from the database; RLS returns only those with current consent.
+  const grantedIds = new Set(consents.filter(c => c.doctorId === currentUser?.id && c.status === 'granted').map(c => c.patientId));
+  const patients = useMemo(() => users
+    .filter(u => u.role === 'patient' && grantedIds.has(u.id))
+    .filter(u => !search || u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => a.name.localeCompare(b.name)),
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  [users, consents, search]);
 
-  const patients = users.filter(u =>
-    u.role === 'patient' &&
-    grantedConsents.some(c => c.patientId === u.id)
-  );
+  const pageCount = Math.max(1, Math.ceil(patients.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const pagePatients = patients.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
-  const allPatients = users.filter(u => u.role === 'patient');
+  const selectedPatient = patients.find(p => p.id === selectedPatientId) ?? users.find(u => u.id === selectedPatientId && grantedIds.has(u.id));
+  const patientRecords = records.filter(r => r.patientId === selectedPatient?.id).sort((a, b) => b.date.localeCompare(a.date));
+  const patientMeds = medicines.filter(m => m.patientId === selectedPatient?.id);
+  const patientVaccines = vaccines.filter(v => v.patientId === selectedPatient?.id);
 
-  const selectedPatient = patients.find(p => p.id === selectedPatientId);
-  const hasAccess = selectedPatient !== undefined;
+  const openRecord = (r: HealthRecord) => { setViewRecord(r); setAi({ loading: false, analysis: r.aiAnalysis }); };
 
-  const patientRecords = selectedPatientId
-    ? records.filter(r => r.patientId === selectedPatientId)
-    : [];
+  const runAI = async () => {
+    if (!viewRecord) return;
+    setAi({ loading: true });
+    try {
+      const { analysis } = await apiPost<{ analysis: HealthRecord['aiAnalysis'] }>('/api/ai/summarize', { recordId: viewRecord.id });
+      setAi({ loading: false, analysis });
+    } catch (e) {
+      setAi({ loading: false, error: (e as Error).message });
+    }
+  };
 
-  const patientMeds = selectedPatientId
-    ? medicines.filter(m => m.patientId === selectedPatientId)
-    : [];
+  const openFile = async (r: HealthRecord, download: boolean) => {
+    const url = await getFileUrl(r, download);
+    if (url) window.open(url, '_blank', 'noopener');
+  };
 
-  const patientVaccines = selectedPatientId
-    ? vaccines.filter(v => v.patientId === selectedPatientId)
-    : [];
+  const age = (dob?: string) => dob ? Math.floor((Date.now() - new Date(dob).getTime()) / (365.25 * 24 * 3600 * 1000)) : null;
 
   return (
     <div className="page-container">
@@ -49,245 +64,178 @@ export default function DoctorPatients() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '1.25rem', alignItems: 'start' }}>
+      <div className="doctor-patients-layout">
         {/* Patient list */}
         <div className="card">
           <div className="card-header">
             <h3>Patient List</h3>
-            <span className="badge badge-green">{patients.length} authorized</span>
+            <span className="badge badge-green">{grantedIds.size} authorized</span>
+          </div>
+          <div style={{ padding: '0.75rem' }}>
+            <div style={{ position: 'relative' }}>
+              <Search size={14} aria-hidden style={{ position: 'absolute', left: '0.65rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+              <label htmlFor="pt-search" className="sr-only">Search patients</label>
+              <input id="pt-search" placeholder="Search name or email" value={search}
+                onChange={e => { setSearch(e.target.value); setPage(1); }} style={{ paddingLeft: '2rem' }} />
+            </div>
           </div>
           <div>
-            {allPatients.map(patient => {
-              const authorized = grantedConsents.some(c => c.patientId === patient.id);
-              return (
-                <div
-                  key={patient.id}
-                  onClick={() => authorized ? setSelectedPatientId(patient.id) : null}
-                  style={{
-                    padding: '0.85rem 1rem',
-                    borderBottom: '1px solid #f3f4f6',
-                    cursor: authorized ? 'pointer' : 'not-allowed',
-                    background: selectedPatientId === patient.id ? '#dbeafe' : 'transparent',
-                    opacity: authorized ? 1 : 0.5,
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                      <div style={{
-                        width: 36, height: 36, borderRadius: '50%',
-                        background: authorized ? '#dcfce7' : '#f3f4f6',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontWeight: 700, fontSize: '0.8rem',
-                        color: authorized ? '#16a34a' : '#9ca3af'
-                      }}>
-                        {patient.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                      </div>
-                      <div>
-                        <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1f2937' }}>{patient.name}</div>
-                        <div style={{ fontSize: '0.7rem', color: '#9ca3af' }}>
-                          {patient.bloodGroup ?? 'N/A'}
-                          {patient.dateOfBirth && ` · ${new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear()}y`}
-                        </div>
-                      </div>
-                    </div>
-                    {authorized
-                      ? <ChevronRight size={14} color="#9ca3af" />
-                      : <Lock size={13} color="#9ca3af" />
-                    }
+            {pagePatients.length === 0 && (
+              <p style={{ padding: '1rem', fontSize: '0.85rem', color: '#9ca3af', textAlign: 'center' }}>
+                {grantedIds.size === 0 ? 'No patients have granted you access yet.' : 'No patients match your search.'}
+              </p>
+            )}
+            {pagePatients.map(patient => (
+              <button
+                key={patient.id}
+                onClick={() => { setSelectedPatientId(patient.id); setActiveView('records'); }}
+                aria-pressed={selectedPatient?.id === patient.id}
+                style={{
+                  display: 'flex', width: '100%', textAlign: 'left', alignItems: 'center', gap: '0.75rem',
+                  padding: '0.85rem 1rem', border: 'none', borderTop: '1px solid #f3f4f6', cursor: 'pointer',
+                  background: selectedPatient?.id === patient.id ? '#dbeafe' : 'transparent',
+                }}
+              >
+                <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#2563eb', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.8rem', flexShrink: 0 }}>
+                  {patient.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: '0.875rem', color: '#1f2937' }}>{patient.name}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#6b7280', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {records.filter(r => r.patientId === patient.id).length} records
                   </div>
                 </div>
-              );
-            })}
+              </button>
+            ))}
           </div>
+          {pageCount > 1 && (
+            <nav className="pager" aria-label="Patient pages" style={{ padding: '0.75rem' }}>
+              <button className="btn btn-outline btn-sm" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>Prev</button>
+              <span>{currentPage}/{pageCount}</span>
+              <button className="btn btn-outline btn-sm" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>Next</button>
+            </nav>
+          )}
         </div>
 
         {/* Patient detail */}
         <div>
           {!selectedPatient ? (
-            <div className="card" style={{ padding: '3rem', textAlign: 'center', color: '#9ca3af' }}>
-              <Users size={48} style={{ opacity: 0.3, margin: '0 auto 1rem' }} />
+            <div className="card" style={{ padding: '3rem', textAlign: 'center' }}>
+              <Lock size={48} style={{ opacity: 0.3, margin: '0 auto 1rem', color: '#9ca3af' }} />
               <h3 style={{ color: '#6b7280' }}>Select a patient</h3>
-              <p>Choose an authorized patient from the list to view their records</p>
+              <p style={{ color: '#9ca3af' }}>Only patients who have granted you access are listed.</p>
             </div>
           ) : (
             <>
-              {/* Patient header */}
-              <div className="card" style={{ marginBottom: '1rem', padding: '1.25rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{
-                      width: 52, height: 52, borderRadius: '50%', background: '#dbeafe',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontWeight: 700, color: '#2563eb', fontSize: '1rem'
-                    }}>
-                      {selectedPatient.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                    </div>
-                    <div>
-                      <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1f2937' }}>{selectedPatient.name}</h2>
-                      <p style={{ fontSize: '0.82rem', color: '#6b7280' }}>
-                        Blood Group: <strong>{selectedPatient.bloodGroup ?? 'N/A'}</strong>
-                        {selectedPatient.dateOfBirth && ` · Age: ${new Date().getFullYear() - new Date(selectedPatient.dateOfBirth).getFullYear()}`}
-                        {selectedPatient.gender && ` · ${selectedPatient.gender}`}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="badge badge-green">Access Authorized</span>
+              <div className="card" style={{ padding: '1.25rem', marginBottom: '1rem' }}>
+                <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1f2937' }}>{selectedPatient.name}</h2>
+                <p style={{ fontSize: '0.85rem', color: '#6b7280' }}>
+                  Blood Group: <strong>{selectedPatient.bloodGroup || 'N/A'}</strong>
+                  {age(selectedPatient.dateOfBirth) !== null && ` · Age: ${age(selectedPatient.dateOfBirth)}`}
+                  {selectedPatient.gender && ` · ${selectedPatient.gender}`}
+                </p>
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }} role="tablist">
+                  {(['records', 'history', 'trends'] as const).map(v => (
+                    <button key={v} role="tab" aria-selected={activeView === v}
+                      className={`btn btn-sm ${activeView === v ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveView(v)}>
+                      {v === 'records' ? `Records (${patientRecords.length})` : v === 'history' ? 'Medicines & Vaccines' : 'Trends'}
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {/* View tabs */}
-              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-                {([['records', 'Medical Records'], ['history', 'Medical History'], ['trends', 'Health Trends']] as const).map(([tab, label]) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveView(tab)}
-                    className={`btn btn-sm ${activeView === tab ? 'btn-primary' : 'btn-outline'}`}
-                  >
-                    {tab === 'records' ? <FileText size={13} /> : tab === 'history' ? <Users size={13} /> : <TrendingUp size={13} />}
-                    {label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Records view */}
               {activeView === 'records' && (
-                <div className="card">
-                  <div className="card-header"><h3>Medical Records ({patientRecords.length})</h3></div>
-                  {patientRecords.length === 0 ? (
-                    <div className="empty-state">
-                      <p>No records available</p>
-                    </div>
-                  ) : (
-                    <div>
-                      {patientRecords.map(record => (
-                        <div
-                          key={record.id}
-                          style={{
-                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                            padding: '0.85rem 1.25rem', borderBottom: '1px solid #f3f4f6', cursor: 'pointer'
-                          }}
-                          onClick={() => setViewRecord(record)}
-                        >
-                          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                            <FileText size={18} color="#2563eb" />
-                            <div>
-                              <div style={{ fontWeight: 600, fontSize: '0.875rem', color: '#1f2937' }}>{record.name}</div>
-                              <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>{record.date} · {record.hospital}</div>
-                            </div>
-                          </div>
-                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            {record.aiAnalysis && <span className="badge badge-green btn-sm"><Brain size={10} /> AI</span>}
-                            <span className="badge badge-gray" style={{ fontSize: '0.7rem' }}>{record.type}</span>
-                          </div>
+                patientRecords.length === 0 ? (
+                  <div className="card empty-state"><FileText size={36} /><p>No records shared by this patient.</p></div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {patientRecords.map(r => (
+                      <div key={r.id} className="card" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                        <div>
+                          <div style={{ fontWeight: 600 }}>{r.name}</div>
+                          <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>{r.type} · {r.date} · {r.hospital || 'N/A'}</div>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          {r.aiAnalysis && <span className="badge badge-green">AI summary</span>}
+                          <button className="btn btn-outline btn-sm" onClick={() => openRecord(r)}><Eye size={13} /> View</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
               )}
 
-              {/* History view */}
               {activeView === 'history' && (
-                <div className="card">
-                  <div className="card-header"><h3>Medical Timeline</h3></div>
-                  <div style={{ padding: '1rem 1.5rem' }}>
-                    <div style={{ position: 'relative', paddingLeft: '1.5rem', borderLeft: '2px solid #e5e7eb' }}>
-                      {[
-                        ...patientRecords.map(r => ({ type: 'report', date: r.date, title: r.name, detail: `${r.type} · ${r.hospital}`, color: '#2563eb' })),
-                        ...patientMeds.map(m => ({ type: 'medicine', date: m.startDate, title: `Started ${m.name}`, detail: m.dosage, color: '#7c3aed' })),
-                        ...patientVaccines.filter(v => v.status === 'completed').map(v => ({ type: 'vaccine', date: v.date, title: `Vaccine: ${v.name}`, detail: v.dose, color: '#16a34a' })),
-                      ].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10).map((item, i) => (
-                        <div key={i} style={{ position: 'relative', paddingBottom: '1.25rem' }}>
-                          <div style={{
-                            position: 'absolute', left: '-1.65rem', top: 2,
-                            width: 12, height: 12, borderRadius: '50%', background: item.color, border: '2px solid white'
-                          }} />
-                          <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.1rem' }}>{item.date}</div>
-                          <div style={{ fontWeight: 600, fontSize: '0.875rem', color: '#1f2937' }}>{item.title}</div>
-                          <div style={{ fontSize: '0.78rem', color: '#6b7280' }}>{item.detail}</div>
-                        </div>
-                      ))}
+                <div className="grid-2" style={{ gap: '1rem' }}>
+                  <div className="card">
+                    <div className="card-header"><h3>Medicines</h3></div>
+                    <div style={{ padding: '1rem' }}>
+                      {patientMeds.length === 0 ? <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>None recorded.</p> :
+                        patientMeds.map(m => (
+                          <div key={m.id} style={{ padding: '0.5rem 0', borderBottom: '1px solid #f3f4f6', fontSize: '0.85rem' }}>
+                            <strong>{m.name}</strong> {m.dosage} — {m.frequency}
+                            <div style={{ color: '#6b7280', fontSize: '0.75rem' }}>{m.startDate}{m.endDate ? ` → ${m.endDate}` : ' → ongoing'}</div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                  <div className="card">
+                    <div className="card-header"><h3>Vaccinations</h3></div>
+                    <div style={{ padding: '1rem' }}>
+                      {patientVaccines.length === 0 ? <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>None recorded.</p> :
+                        patientVaccines.map(v => (
+                          <div key={v.id} style={{ padding: '0.5rem 0', borderBottom: '1px solid #f3f4f6', fontSize: '0.85rem' }}>
+                            <strong>{v.name}</strong> {v.dose} <span className={`badge ${v.status === 'completed' ? 'badge-green' : v.status === 'overdue' ? 'badge-red' : 'badge-orange'}`}>{v.status}</span>
+                            <div style={{ color: '#6b7280', fontSize: '0.75rem' }}>{v.date || '—'}{v.nextDose ? ` · next ${v.nextDose}` : ''}</div>
+                          </div>
+                        ))}
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Trends view */}
-              {activeView === 'trends' && (
-                <div className="card">
-                  <div className="card-header"><h3>Health Trends</h3></div>
-                  <div style={{ padding: '1.25rem' }}>
-                    <ResponsiveContainer width="100%" height={260}>
-                      <LineChart data={DEMO_TRENDS}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-                        <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                        <YAxis tick={{ fontSize: 11 }} />
-                        <Tooltip contentStyle={{ borderRadius: 8, fontSize: '0.8rem' }} />
-                        <Line type="monotone" dataKey="hemoglobin" stroke="#2563eb" strokeWidth={2} dot={{ r: 3 }} name="Hemoglobin" />
-                        <Line type="monotone" dataKey="bmi" stroke="#16a34a" strokeWidth={2} dot={{ r: 3 }} name="BMI" />
-                      </LineChart>
-                    </ResponsiveContainer>
-                    <div style={{
-                      marginTop: '0.75rem', padding: '0.75rem', background: '#eff6ff',
-                      borderRadius: 8, fontSize: '0.8rem', color: '#1e40af'
-                    }}>
-                      📊 AI Insight: Patient's hemoglobin has shown a positive trend from 11.8 to 12.4 g/dL over 6 months. BMI remains stable in the normal range.
-                    </div>
-                  </div>
-                </div>
-              )}
+              {activeView === 'trends' && <TrendsPanel key={selectedPatient.id} patientId={selectedPatient.id} editable={false} />}
             </>
           )}
         </div>
       </div>
 
-      {/* Record detail modal */}
       {viewRecord && (
         <div className="modal-overlay" onClick={() => setViewRecord(null)}>
-          <div className="modal" style={{ maxWidth: 680 }} onClick={e => e.stopPropagation()}>
+          <div className="modal" role="dialog" aria-modal="true" style={{ maxWidth: 700 }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h3>{viewRecord.name}</h3>
-              <button style={{ background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => setViewRecord(null)}>
+              <button aria-label="Close" style={{ background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => setViewRecord(null)}>
                 <X size={20} color="#6b7280" />
               </button>
             </div>
             <div className="modal-body">
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
-                {[
-                  { label: 'Type', value: viewRecord.type },
-                  { label: 'Date', value: viewRecord.date },
-                  { label: 'Hospital', value: viewRecord.hospital || 'N/A' },
-                  { label: 'Doctor', value: viewRecord.doctor || 'N/A' },
-                ].map(({ label, value }) => (
-                  <div key={label} style={{ background: '#f9fafb', borderRadius: 8, padding: '0.75rem' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#9ca3af', fontWeight: 600 }}>{label}</div>
-                    <div style={{ fontSize: '0.875rem', color: '#1f2937', fontWeight: 500 }}>{value}</div>
-                  </div>
-                ))}
-              </div>
-
-              {viewRecord.extractedText && (
-                <div style={{ marginBottom: '1rem' }}>
-                  <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#374151', marginBottom: '0.5rem' }}>Report Content</h4>
-                  <pre style={{ background: '#1f2937', color: '#f9fafb', padding: '1rem', borderRadius: 8, fontSize: '0.78rem', whiteSpace: 'pre-wrap', maxHeight: 200, overflowY: 'auto', fontFamily: 'monospace' }}>
-                    {viewRecord.extractedText}
-                  </pre>
+              <p style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '1rem' }}>
+                {viewRecord.type} · {viewRecord.date} · {viewRecord.hospital || 'N/A'} · {viewRecord.doctor || 'N/A'}
+              </p>
+              {viewRecord.notes && <p style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>📝 {viewRecord.notes}</p>}
+              {viewRecord.filePath && (
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                  <button className="btn btn-outline btn-sm" onClick={() => openFile(viewRecord, false)}><Eye size={13} /> Open file</button>
+                  <button className="btn btn-outline btn-sm" onClick={() => openFile(viewRecord, true)}><Download size={13} /> Download</button>
                 </div>
               )}
-
-              {viewRecord.aiAnalysis && (
-                <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 8, padding: '1rem' }}>
-                  <h4 style={{ fontWeight: 600, color: '#166534', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
-                    <Brain size={14} /> AI Summary
-                  </h4>
-                  <p style={{ fontSize: '0.85rem', color: '#374151', marginBottom: '0.5rem' }}>{viewRecord.aiAnalysis.summary}</p>
-                  {viewRecord.aiAnalysis.keyFindings.slice(0, 2).map((f, i) => (
-                    <div key={i} style={{ display: 'flex', gap: '0.4rem', fontSize: '0.8rem', color: '#166534', marginBottom: '0.2rem' }}>
-                      <CheckCircle size={12} style={{ flexShrink: 0, marginTop: 2 }} />
-                      {f}
-                    </div>
-                  ))}
-                </div>
+              {viewRecord.extractedText && (
+                <details style={{ marginBottom: '1rem' }}>
+                  <summary style={{ cursor: 'pointer', fontWeight: 600, fontSize: '0.875rem' }}>Extracted text</summary>
+                  <pre style={{ background: '#1f2937', color: '#f9fafb', padding: '1rem', borderRadius: 8, fontSize: '0.78rem', whiteSpace: 'pre-wrap', maxHeight: 240, overflowY: 'auto' }}>{viewRecord.extractedText}</pre>
+                </details>
+              )}
+              {ai.loading ? (
+                <p role="status"><Loader size={16} className="spin" /> Generating AI summary…</p>
+              ) : ai.error ? (
+                <div className="alert alert-danger" role="alert"><AlertCircle size={14} /> {ai.error}</div>
+              ) : ai.analysis ? (
+                <AIAnalysisView analysis={ai.analysis} />
+              ) : viewRecord.extractedText ? (
+                <button className="btn btn-primary btn-sm" onClick={runAI}><Brain size={14} /> Generate AI summary</button>
+              ) : (
+                <p style={{ fontSize: '0.8rem', color: '#9ca3af' }}>No extracted text or AI summary available for this record.</p>
               )}
             </div>
           </div>

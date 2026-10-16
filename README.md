@@ -1,191 +1,102 @@
 # HealthAI — AI-Powered Personal Health Record Manager
 
-> Academic prototype — College Project
+> Your Health. One Secure Place.
 
-A secure, AI-powered healthcare platform where patients can store medical records, use AI to understand reports, track wellness, and share records with doctors through patient-controlled consent.
+A full-stack React + TypeScript app (Vite) for keeping personal health records. It uses Supabase for auth, the Postgres database and private file storage, and Vercel serverless functions for AI features (Anthropic Claude). OCR runs in the browser with Tesseract.js and pdf.js.
 
----
+> **Educational project.** HealthAI is not a medical device. It has not been clinically validated or certified for regulatory compliance (HIPAA, DPDP, etc.), and AI output is never a diagnosis.
 
-## Live Demo
+## Architecture
 
-> Deploy to Vercel and get a URL like `https://health-ai-prototype.vercel.app`
+| Layer | Technology |
+|---|---|
+| Frontend | React 18, TypeScript, Vite, React Router, Recharts, lucide-react |
+| Auth | Supabase Auth (email + password, password recovery) |
+| Database | Supabase Postgres with Row Level Security on every table |
+| Files | Private Supabase Storage bucket `medical-files`, 5-minute signed URLs |
+| AI | `/api/ai/*` Vercel functions calling the Anthropic Messages API (key stays on the server) |
+| OCR | Tesseract.js (images and scanned PDF pages) and pdf.js (text PDFs), both in the browser |
+| QR | `qrcode` library; the QR holds only a link with a revocable 256-bit token |
 
-**Demo Credentials:**
-| Role | Email | Password |
-|------|-------|----------|
-| Patient | `patient@healthai.demo` | `patient123` |
-| Doctor | `doctor@healthai.demo` | `doctor123` |
+### Security model
+- **Roles** live in `profiles.role`, set by a database trigger at sign-up. A trigger stops users from changing their own `role` or `doctor_verified` value.
+- **Doctors** can register, but they see no patient data until an administrator sets `doctor_verified = true`.
+- **Consent** is enforced in the database. Every doctor-read policy calls `doctor_has_consent(patient_id)`, so revoking consent blocks the doctor's very next query. Consent changes are written to `consent_audit_logs` by a trigger.
+- **Files** are stored under `<patient_id>/…`. Storage policies allow the owner, or a verified doctor with current consent, to read them.
+- **AI routes** check the caller's Supabase JWT and query as that user, so RLS still applies. Each user gets 30 AI calls per hour by default. Request bodies are never logged.
+- **Emergency page** (`/emergency/<token>`) uses the `get_emergency_profile` RPC. It returns only the emergency fields, and only for a valid token.
 
----
+## Project layout
+```
+api/                 Vercel serverless functions (AI endpoints + shared helpers)
+scripts/seed.mjs     Fictional demo data (12 doctors, 12 patients, records, wellness …)
+src/context/         AppContext — loads and mutates data via Supabase
+src/lib/             supabase client, API helper, OCR
+src/components/      Sidebar, AIAnalysisView, TrendsPanel
+src/pages/           Landing, auth, patient and doctor pages, public emergency page
+supabase/migrations/ Schema, RLS policies, storage bucket and functions
+tests/               Static safety checks (npm test)
+```
 
-## Tech Stack
+## 1. Supabase setup
+1. Create a project at https://supabase.com.
+2. In **SQL Editor**, paste and run `supabase/migrations/0001_init.sql`. If you use the Supabase CLI, run `supabase link` and then `supabase db push` instead.
+3. Go to **Authentication → URL Configuration**:
+   - Site URL: `https://health-ai-omega-three.vercel.app`
+   - Redirect URLs: `https://health-ai-omega-three.vercel.app/**` and `http://localhost:3000/**` (also `http://localhost:5173/**`)
+4. Optional: under **Authentication → Providers → Email**, turn off "Confirm email" for quicker testing. Leave it on for production.
+5. Copy the **Project URL** and **anon public key** from **Project Settings → API**.
 
-- **Frontend:** React 18 + TypeScript + Vite
-- **Routing:** React Router v6
-- **Charts:** Recharts
-- **Icons:** Lucide React
-- **Storage:** Browser localStorage (no backend required)
-- **AI:** Demo response engine (no API key required)
-- **Deployment:** Vercel (static SPA)
+### Verifying a doctor
+Run this in the SQL editor:
+```sql
+update public.profiles set doctor_verified = true where email = 'doctor@example.com';
+```
 
----
+## 2. Environment variables
+Copy `.env.example` to `.env.local`.
 
-## Local Development
+| Variable | Where | Secret? |
+|---|---|---|
+| `VITE_SUPABASE_URL` | `.env.local` and Vercel (all environments) | No |
+| `VITE_SUPABASE_ANON_KEY` | `.env.local` and Vercel | No (RLS protects data) |
+| `ANTHROPIC_API_KEY` | `.env.local` (for `vercel dev`) and Vercel only | **Yes** |
+| `ANTHROPIC_MODEL` | optional; defaults to `claude-sonnet-5-5` | No |
+| `AI_CALLS_PER_HOUR` | optional; defaults to 30 | No |
+| `SUPABASE_SERVICE_ROLE_KEY` | your shell, only when running `npm run seed`. **Never in Vercel or the frontend** | **Yes** |
+| `SEED_PASSWORD` | your shell, only for seeding | Yes |
 
+## 3. Run locally
 ```bash
-# Install dependencies
 npm install
-
-# Start dev server (http://localhost:5173)
-npm run dev
-
-# Type check
+npm test            # static safety checks
 npm run type-check
-
-# Production build
-npm run build
-
-# Preview production build locally
-npm run preview
+npx vercel dev      # runs the frontend and /api functions on http://localhost:3000
 ```
+`npm run dev` (plain Vite) also works for the UI, but `/api` routes won't exist, so AI features show a clear "API not reachable" error.
 
----
-
-## Vercel Deployment
-
-### Option A — Deploy via Vercel Dashboard (Recommended)
-
-1. Push this project to a GitHub repository
-2. Go to [vercel.com](https://vercel.com) and sign in
-3. Click **"Add New Project"** → **"Import Git Repository"**
-4. Select your repository
-5. Vercel auto-detects **Vite** framework
-6. Build settings (auto-detected, no changes needed):
-   - **Framework Preset:** Vite
-   - **Build Command:** `npm run build`
-   - **Output Directory:** `dist`
-7. Environment Variables: None required for the demo
-8. Click **Deploy**
-
-### Option B — Deploy via Vercel CLI
-
+### Demo data (fictional)
 ```bash
-# Install Vercel CLI
-npm install -g vercel
-
-# Login to Vercel
-vercel login
-
-# Deploy preview
-vercel
-
-# Deploy to production
-vercel --prod
+SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... SEED_PASSWORD=... npm run seed
 ```
+This creates `doctor1..12@healthai.test` (verified) and `patient1..12@healthai.test`, each with records, wellness, measurements, medicines, vaccines and consents. Set `SEED_PATIENTS` or `SEED_DOCTORS` to create more.
 
----
+## 4. Deploy to Vercel
+1. Push this branch to GitHub and open a PR. The Vercel GitHub integration builds a **preview** deployment, and production stays untouched.
+2. In Vercel → Project → Settings → Environment Variables, add `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` and `ANTHROPIC_API_KEY` for Production and Preview.
+3. Test the preview URL, then merge to `main` to update production.
+4. Add the preview domain pattern to the Supabase redirect URLs if you test password reset on previews.
 
-## Environment Variables
-
-No environment variables are **required** for the academic demo. The app works fully with browser localStorage.
-
-For production extensions, copy `.env.example` to `.env.local`:
-
-```bash
-cp .env.example .env.local
-```
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `VITE_APP_NAME` | No | Application display name |
-| `VITE_OPENAI_API_KEY` | No | For real AI responses (not implemented in demo) |
-| `VITE_SUPABASE_URL` | No | For persistent database (not used in demo) |
-| `VITE_SUPABASE_ANON_KEY` | No | For Supabase auth (not used in demo) |
-
----
-
-## Project Structure
-
-```
-health-ai/
-├── public/
-│   └── favicon.svg
-├── src/
-│   ├── components/
-│   │   └── Sidebar.tsx
-│   ├── context/
-│   │   └── AppContext.tsx        # Global state (localStorage)
-│   ├── data/
-│   │   └── demoData.ts           # Demo patients, records, etc.
-│   ├── pages/
-│   │   ├── LandingPage.tsx
-│   │   ├── LoginPage.tsx
-│   │   ├── RegisterPage.tsx
-│   │   ├── patient/
-│   │   │   ├── PatientDashboard.tsx
-│   │   │   ├── HealthRecords.tsx
-│   │   │   ├── AIAssistant.tsx
-│   │   │   ├── WellnessTracker.tsx
-│   │   │   ├── HealthTrends.tsx
-│   │   │   ├── EmergencyProfile.tsx
-│   │   │   ├── DoctorSharing.tsx
-│   │   │   └── Settings.tsx
-│   │   └── doctor/
-│   │       ├── DoctorDashboard.tsx
-│   │       ├── DoctorPatients.tsx
-│   │       ├── DoctorReports.tsx
-│   │       ├── DoctorHistory.tsx
-│   │       ├── DoctorTrends.tsx
-│   │       └── DoctorConsent.tsx
-│   ├── types/
-│   │   └── index.ts
-│   ├── utils/
-│   │   └── aiUtils.ts            # Demo AI responses
-│   ├── App.tsx                   # Router + protected routes
-│   ├── main.tsx
-│   └── index.css
-├── .env.example
-├── .gitignore
-├── index.html
-├── package.json
-├── tsconfig.json
-├── vercel.json                   # SPA routing + cache headers
-└── vite.config.ts
-```
-
----
+`vercel.json` rewrites every non-`/api` path to `index.html`, so direct links and page refreshes work.
 
 ## Features
+- **Patients:** dashboard computed from real data; records with upload, view, download, search, filter, sort, pagination and confirmed delete; OCR with review and correction; AI report summaries saved per record; AI assistant with private history; symptom checker with urgency triage; daily wellness log (water against a goal, sleep, exercise, weight, meals) with history; BMI; medicines (active and completed, mark taken, edit); vaccinations (completed, upcoming or overdue, edit); health measurements with date-range charts and an AI trend summary; emergency profile with QR (enable, regenerate, disable); doctor consent (grant or revoke, with audit history); settings (profile, password, AI status, privacy).
+- **Doctors:** dashboard; searchable, paginated list of authorized patients; patient records with signed-URL file access and on-demand AI summaries; medicines and vaccines; trends; history timeline; consent list; settings.
 
-### Patient Portal
-- Dashboard with health overview cards
-- Health Records (upload, view, OCR extract, AI analyze)
-- AI Chat Assistant with demo health responses
-- Symptom Checker
-- Wellness Tracker (water, sleep, exercise, weight/BMI)
-- Medicine Tracker with reminders
-- Vaccination Records
-- Health Trends with interactive charts
-- Emergency Profile with QR code
-- Doctor Sharing with consent management
-- Settings
-
-### Doctor Portal
-- Dashboard with authorized patients
-- Patient list with access control
-- Medical records viewer
-- Medical history timeline
-- Health trends (hemoglobin, BP, glucose, BMI)
-- Consent management with access logs
-
----
-
-## Disclaimer
-
-This is an academic prototype for educational purposes only. It does not constitute medical advice, diagnosis, or treatment. All data shown is demo data. Do not use this for real medical decisions.
-
----
-
-## Author
-
-Built as a college project — Academic Prototype
+## Known limitations
+- **Reminders:** no background or push notifications. Upcoming doses appear only in the app. Real reminders would need a scheduler, such as Supabase cron plus an email or push provider.
+- **OCR:** English only, processed in the browser, first 10 PDF pages only. Accuracy drops on handwriting, low-resolution or rotated scans, so always review the extracted text before saving it.
+- **Lists:** loaded client-side through paged fetches with no row cap, which suits hundreds to low thousands of rows per user. Very large accounts would need server-side pagination.
+- **Doctor verification:** manual, done in SQL.
+- **Signed URLs:** valid for 5 minutes. A link issued before consent was revoked stays usable until it expires.
+- **Compliance:** none claimed. A security review is needed before handling real patient data.

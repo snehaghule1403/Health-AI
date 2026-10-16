@@ -16,6 +16,8 @@ export interface User {
   medicalRegistrationId?: string;
   specialization?: string;
   hospital?: string;
+  doctorVerified?: boolean;
+  waterGoal?: number;
 }
 
 export interface HealthRecord {
@@ -27,7 +29,12 @@ export interface HealthRecord {
   hospital: string;
   doctor: string;
   notes: string;
-  fileUrl?: string;
+  filePath?: string;
+  fileName?: string;
+  fileMime?: string;
+  fileSize?: number;
+  ocrStatus?: 'none' | 'done' | 'failed';
+  createdAt?: string;
   extractedText?: string;
   aiAnalysis?: AIAnalysis;
 }
@@ -35,7 +42,9 @@ export interface HealthRecord {
 export interface AIAnalysis {
   summary: string;
   keyFindings: string[];
-  importantValues: { name: string; value: string; status: 'normal' | 'low' | 'high' | 'info' }[];
+  importantValues: { name: string; value: string; referenceRange?: string | null; status: 'normal' | 'low' | 'high' | 'info' }[];
+  missingOrUncertain?: string[];
+  model?: string;
   simpleExplanation: string;
   questionsForDoctor: string[];
   disclaimer: string;
@@ -74,7 +83,19 @@ export interface WellnessEntry {
   waterGlasses: number;
   sleepHours: number;
   exerciseMinutes: number;
+  exerciseType?: string;
+  meals?: string;
   weight?: number;
+}
+
+export interface HealthMeasurement {
+  id: string;
+  patientId: string;
+  date: string;
+  kind: 'glucose' | 'hemoglobin' | 'systolic' | 'diastolic' | 'weight' | 'other';
+  value: number;
+  unit: string;
+  label?: string;
 }
 
 export interface Symptom {

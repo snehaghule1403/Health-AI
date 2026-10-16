@@ -4,6 +4,8 @@ import {
   TrendingUp, AlertCircle, Share2, Settings, LogOut,
   Users, ClipboardList, History, ShieldCheck, Stethoscope
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Menu, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 const PATIENT_NAV = [
@@ -24,12 +26,15 @@ const DOCTOR_NAV = [
   { label: 'Medical History', path: '/doctor/history', icon: <History size={18} /> },
   { label: 'Health Trends', path: '/doctor/trends', icon: <TrendingUp size={18} /> },
   { label: 'Consent', path: '/doctor/consent', icon: <ShieldCheck size={18} /> },
+  { label: 'Settings', path: '/doctor/settings', icon: <Settings size={18} /> },
 ];
 
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser, logout } = useApp();
+  const [open, setOpen] = useState(false);
+  useEffect(() => setOpen(false), [location.pathname]);
 
   if (!currentUser) return null;
 
@@ -37,7 +42,7 @@ export default function Sidebar() {
   const navItems = isPatient ? PATIENT_NAV : DOCTOR_NAV;
 
   const handleLogout = () => {
-    logout();
+    void logout();
     navigate('/');
   };
 
@@ -45,7 +50,15 @@ export default function Sidebar() {
     name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
   return (
-    <aside className="sidebar">
+    <>
+    <header className="mobile-topbar">
+      <button className="mobile-menu-btn" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} aria-controls="app-sidebar" onClick={() => setOpen(o => !o)}>
+        {open ? <X size={22} /> : <Menu size={22} />}
+      </button>
+      <span style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}><Heart size={18} fill="white" /> HealthAI</span>
+    </header>
+    {open && <div className="sidebar-backdrop" onClick={() => setOpen(false)} aria-hidden />}
+    <aside id="app-sidebar" className={`sidebar ${open ? 'open' : ''}`}>
       {/* Logo */}
       <div className="sidebar-logo">
         <h2>
@@ -85,6 +98,7 @@ export default function Sidebar() {
           <button
             key={item.path}
             className={`sidebar-nav-item ${location.pathname === item.path ? 'active' : ''}`}
+            aria-current={location.pathname === item.path ? 'page' : undefined}
             onClick={() => navigate(item.path)}
           >
             {item.icon}
@@ -102,7 +116,7 @@ export default function Sidebar() {
           }}>
             <Stethoscope size={14} color="rgba(255,255,255,0.4)" />
             <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)' }}>
-              {currentUser.hospital ?? 'Demo Medical Center'}
+              {currentUser.hospital || 'Hospital not set'}
             </span>
           </div>
         )}
@@ -115,9 +129,10 @@ export default function Sidebar() {
           Logout
         </button>
         <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.25)', marginTop: '0.75rem', lineHeight: 1.4 }}>
-          HealthAI Prototype v1.0<br />Academic Project
+          HealthAI v2.0<br />Not a substitute for professional care
         </div>
       </div>
     </aside>
+    </>
   );
 }

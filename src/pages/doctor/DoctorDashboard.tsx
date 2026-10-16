@@ -33,13 +33,13 @@ export default function DoctorDashboard() {
     },
     {
       icon: <ShieldCheck size={20} />, iconBg: '#fef3c7', iconColor: '#d97706',
-      label: 'Pending Requests', value: consents.filter(c =>
-        c.doctorId === currentUser?.id && c.status === 'pending'
-      ).length, sub: 'Awaiting patient approval'
+      label: 'Revoked Access', value: consents.filter(c =>
+        c.doctorId === currentUser?.id && c.status === 'revoked'
+      ).length, sub: 'Patients who withdrew consent'
     },
     {
       icon: <Activity size={20} />, iconBg: '#ede9fe', iconColor: '#7c3aed',
-      label: 'Consultations', value: 3, sub: 'This month (demo)'
+      label: 'AI Summaries', value: records.filter(r => r.aiAnalysis && grantedConsents.some(c => c.patientId === r.patientId)).length, sub: 'Reports with AI summary'
     },
   ];
 
@@ -47,12 +47,12 @@ export default function DoctorDashboard() {
     <div className="page-container">
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
-        <div className="demo-badge" style={{ marginBottom: '0.5rem' }}>DEMO DATA</div>
+
         <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#1f2937' }}>
           {greeting}, {firstName} 👋
         </h1>
         <p style={{ color: '#6b7280', marginTop: '0.25rem' }}>
-          {currentUser?.specialization ?? 'Doctor'} · {currentUser?.hospital ?? 'Demo Medical Center'}
+          {currentUser?.specialization ?? 'Doctor'} · {currentUser?.hospital || 'Hospital not set'}
         </p>
       </div>
 
