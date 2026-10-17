@@ -25,8 +25,8 @@ export default function AuroraFX() {
           el.style.setProperty('--px', `${((e.clientX - r.left) / r.width) * 100}%`);
           el.style.setProperty('--py', `${((e.clientY - r.top) / r.height) * 100}%`);
           if (el.hasAttribute('data-tilt')) {
-            const rx = ((e.clientY - r.top) / r.height - 0.5) * -10;
-            const ry = ((e.clientX - r.left) / r.width - 0.5) * 12;
+            const rx = ((e.clientY - r.top) / r.height - 0.5) * -3;
+            const ry = ((e.clientX - r.left) / r.width - 0.5) * 4;
             el.style.setProperty('--rx', `${rx}deg`);
             el.style.setProperty('--ry', `${ry}deg`);
           }
