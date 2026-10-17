@@ -56,10 +56,6 @@ export default function DoctorDashboard() {
         </p>
       </div>
 
-      <div className="disclaimer" style={{ marginBottom: '1.5rem' }}>
-        <AlertCircle size={16} style={{ flexShrink: 0 }} />
-        You can only access patient records when the patient has explicitly granted you consent.
-      </div>
 
       {/* Stats */}
       <div className="grid-4" style={{ marginBottom: '2rem' }}>

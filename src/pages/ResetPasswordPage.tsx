@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { readAuthUrlError } from '../lib/siteUrl';
 
 // Landing page for the password-recovery email link from Supabase Auth.
 export default function ResetPasswordPage() {
@@ -12,6 +13,8 @@ export default function ResetPasswordPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    const urlError = readAuthUrlError();
+    if (urlError) { setStatus({ ok: false, msg: urlError }); setHasSession(false); return; }
     supabase.auth.getSession().then(({ data }) => setHasSession(!!data.session));
     const { data } = supabase.auth.onAuthStateChange((event) => { if (event === 'PASSWORD_RECOVERY') setHasSession(true); });
     return () => data.subscription.unsubscribe();
@@ -30,7 +33,7 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', background: 'linear-gradient(135deg, var(--primary-light) 0%, var(--primary-light) 100%)' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', background: 'transparent' }}>
       <div className="card" style={{ width: '100%', maxWidth: 420, padding: '2rem' }}>
         <h1 style={{ fontSize: '1.4rem', marginBottom: '1rem' }}>Set a new password</h1>
         {hasSession === false && !status?.ok && (
@@ -45,8 +48,11 @@ export default function ResetPasswordPage() {
             <button className="btn btn-primary" disabled={saving}>{saving ? 'Saving…' : 'Update password'}</button>
           </form>
         )}
-        {status && <p role="status" style={{ marginTop: '0.75rem', color: status.ok ? 'var(--green-ink)' : '#991b1b' }}>{status.msg}</p>}
-        <button className="btn btn-outline" style={{ marginTop: '1rem' }} onClick={() => navigate('/')}>Back to home</button>
+        {status && <p role="status" style={{ marginTop: '0.75rem', color: status.ok ? 'var(--green-ink)' : 'var(--red-ink)' }}>{status.msg}</p>}
+        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+          {status?.ok && <button className="btn btn-primary" onClick={() => navigate('/login/patient')}>Go to sign in</button>}
+          <button className="btn btn-outline" onClick={() => navigate('/')}>Back to home</button>
+        </div>
       </div>
     </div>
   );

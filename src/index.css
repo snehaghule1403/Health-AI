@@ -749,13 +749,16 @@ tr:hover td { background: rgba(143,176,214,.05); }
 .grad-text { color: var(--primary); font-style: italic; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; letter-spacing: -0.01em; }
 
 /* ─── DISCLAIMER ──────────────────────────────────────────────────────────────── */
+/* Quiet, neutral safety note — informative without shouting. */
 .disclaimer {
-  background: var(--yellow-light);
-  border: 1px solid rgba(255,214,102,.3);
-  color: var(--yellow-ink);
-  border-radius: var(--radius-sm);
-  padding: 0.75rem 1rem;
-  font-size: 0.8rem;
+  background: transparent;
+  border: 0;
+  border-left: 2px solid var(--glass-border-hi);
+  color: var(--gray-500);
+  border-radius: 0;
+  padding: 0.15rem 0 0.15rem 0.85rem;
+  font-size: 0.78rem;
+  line-height: 1.5;
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
@@ -1062,3 +1065,21 @@ tr:hover td { background: rgba(143,176,214,.05); }
   [data-reveal] { opacity: 1; transform: none; filter: none; }
   .cursor-glow { display: none; }
 }
+
+/* ═══ AI ASSISTANT + VOICE ═══════════════════════════════════════════════ */
+.assistant-layout { display: grid; grid-template-columns: 1fr 280px; gap: 1.25rem; align-items: start; }
+@media (max-width: 900px) { .assistant-layout { grid-template-columns: 1fr; } }
+.voice-bar { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; margin-bottom: .6rem; }
+.voice-bar select { padding: .4rem .7rem; font-size: .82rem; }
+.voice-toggle { display: inline-flex; align-items: center; gap: .4rem; font-size: .78rem; color: var(--gray-500); cursor: pointer; }
+.mic-btn { padding: .55rem .85rem; }
+.mic-btn.listening { background: var(--red); color: white; animation: micPulse 1.4s ease-in-out infinite; }
+@keyframes micPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(208,138,138,.45); } 50% { box-shadow: 0 0 0 8px rgba(208,138,138,0); } }
+.speak-controls { display: flex; gap: .35rem; margin-top: .6rem; padding-top: .5rem; border-top: 1px solid var(--glass-border); }
+.speak-controls button {
+  display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .6rem; border-radius: 6px;
+  font-size: .75rem; color: var(--gray-500); background: transparent; border: 1px solid var(--glass-border);
+  transition: color .2s, border-color .2s, background .2s;
+}
+.speak-controls button:hover { color: var(--gray-900); border-color: var(--glass-border-hi); background: rgba(255,255,255,.04); }
+@keyframes bounce { 0%, 80%, 100% { transform: translateY(0); opacity: .5; } 40% { transform: translateY(-4px); opacity: 1; } }

@@ -1,9 +1,10 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type {
   User, HealthRecord, Medicine, Vaccine, WellnessEntry, ConsentRecord,
   ChatMessage, Symptom, HealthMeasurement, HealthTrendEntry, EmergencyProfile,
 } from '../types';
-import { supabase, supabaseConfigured, fetchAll, FILE_BUCKET, MAX_FILE_BYTES, ALLOWED_MIME } from '../lib/supabase';
+import { supabase, supabaseConfigured, fetchAll, FILE_BUCKET, MAX_FILE_BYTES, ALLOWED_MIME, fileMime } from '../lib/supabase';
+import { authRedirectOrigin } from '../lib/siteUrl';
 
 // All data lives in Supabase. This context loads what the signed-in user is
 // allowed to see (RLS decides) and exposes the same shape the pages already use.
@@ -127,6 +128,7 @@ interface AppState {
   logout: () => Promise<void>;
   register: (input: RegisterInput) => Promise<{ ok: boolean; error?: string; needsConfirmation?: boolean }>;
   resetPassword: (email: string) => Promise<{ ok: boolean; error?: string }>;
+  resendVerification: (email: string, role: 'patient' | 'doctor') => Promise<{ ok: boolean; error?: string }>;
   updateProfile: (u: Partial<User>) => Promise<boolean>;
   refresh: () => Promise<void>;
 
@@ -164,6 +166,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const loadedUserId = useRef<string | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [records, setRecords] = useState<HealthRecord[]>([]);
   const [medicines, setMedicines] = useState<Medicine[]>([]);
@@ -190,6 +193,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (meErr || !me) throw new Error('Your profile could not be loaded.');
       const self = toUser(me);
       setCurrentUser(self);
+      loadedUserId.current = self.id;
 
       const q = (table: string, order: string, asc = false) =>
         fetchAll<Row>((a, b) => supabase.from(table).select('*').order(order, { ascending: asc }).range(a, b));
@@ -242,7 +246,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setReady(true);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT' || !session) { setCurrentUser(null); clearData(); }
+      if (event === 'SIGNED_OUT' || !session) { loadedUserId.current = null; setCurrentUser(null); clearData(); return; }
+      // Email-verification links sign the user in on arrival; load their data.
+      // Deferred so we never await Supabase calls inside the auth callback.
+      if (event === 'SIGNED_IN') {
+        const uid = session.user.id;
+        setTimeout(() => { if (loadedUserId.current !== uid) void loadAll(uid); }, 0);
+      }
     });
     return () => sub.subscription.unsubscribe();
   }, [loadAll]);
@@ -267,7 +277,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       email: input.email,
       password: input.password,
       options: {
-        emailRedirectTo: `${window.location.origin}/login/${input.role}`,
+        emailRedirectTo: `${authRedirectOrigin()}/login/${input.role}`,
         // Read by the handle_new_user trigger. Doctors still need admin verification.
         data: {
           role: input.role, name: input.name, phone: input.phone, date_of_birth: input.dateOfBirth,
@@ -284,7 +294,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resetPassword: AppState['resetPassword'] = async (email) => {
-    const { error: err } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
+    const { error: err } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${authRedirectOrigin()}/reset-password` });
+    return err ? { ok: false, error: err.message } : { ok: true };
+  };
+
+  const resendVerification: AppState['resendVerification'] = async (email, role) => {
+    const { error: err } = await supabase.auth.resend({
+      type: 'signup', email, options: { emailRedirectTo: `${authRedirectOrigin()}/login/${role}` },
+    });
     return err ? { ok: false, error: err.message } : { ok: true };
   };
 
@@ -303,16 +320,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addRecord: AppState['addRecord'] = async (record, file) => {
     if (!currentUser) return null;
     let filePath: string | undefined;
+    let mime: string | undefined;
     if (file) {
-      if (!ALLOWED_MIME.includes(file.type)) return fail('Only PDF, PNG and JPEG files are supported.');
+      mime = fileMime(file);
+      if (!ALLOWED_MIME.includes(mime)) return fail('Only PDF, PNG and JPEG files are supported.');
       if (file.size > MAX_FILE_BYTES) return fail('File is larger than 10 MB.');
       const safe = file.name.replace(/[^\w.-]+/g, '_').slice(-80);
       filePath = `${currentUser.id}/${crypto.randomUUID()}-${safe}`;
-      const { error: upErr } = await supabase.storage.from(FILE_BUCKET).upload(filePath, file, { contentType: file.type });
+      const { error: upErr } = await supabase.storage.from(FILE_BUCKET).upload(filePath, file, { contentType: mime });
       if (upErr) return fail(`Upload failed: ${upErr.message}`);
     }
     const row = {
-      ...fromRecord({ ...record, filePath, fileName: file?.name, fileMime: file?.type, fileSize: file?.size }),
+      ...fromRecord({ ...record, filePath, fileName: file?.name, fileMime: mime, fileSize: file?.size }),
       patient_id: currentUser.id,
     };
     const { data, error: err } = await supabase.from('medical_records').insert(row).select().single();
@@ -474,7 +493,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<AppState>(() => ({
     ready, configured: supabaseConfigured, loading, error, clearError: () => setError(null),
     currentUser, users, records, medicines, vaccines, wellness, measurements, consents, chatMessages, symptoms, emergencyProfiles,
-    login, logout, register, resetPassword, updateProfile, refresh,
+    login, logout, register, resetPassword, resendVerification, updateProfile, refresh,
     addRecord, updateRecord, deleteRecord, getFileUrl, downloadFile,
     addMedicine, updateMedicine, deleteMedicine, addVaccine, updateVaccine, deleteVaccine,
     addWellnessEntry, updateTodayWellness, deleteWellnessEntry, addMeasurement, deleteMeasurement,

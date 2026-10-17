@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Heart, Stethoscope, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { readAuthUrlError } from '../lib/siteUrl';
 
 export default function LoginPage() {
   const { role } = useParams<{ role: 'patient' | 'doctor' }>();
   const navigate = useNavigate();
-  const { login, resetPassword } = useApp();
+  const { login, resetPassword, resendVerification, currentUser, ready } = useApp();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,6 +18,19 @@ export default function LoginPage() {
   const isPatient = role === 'patient';
 
   const [info, setInfo] = useState('');
+  const [unconfirmed, setUnconfirmed] = useState(false);
+
+  // Arriving from an email link: show its error, or continue once the session loads.
+  useEffect(() => {
+    const urlError = readAuthUrlError();
+    if (urlError) {
+      setError(urlError);
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, []);
+  useEffect(() => {
+    if (ready && currentUser) navigate(currentUser.role === 'doctor' ? '/doctor/dashboard' : '/patient/dashboard', { replace: true });
+  }, [ready, currentUser, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,9 +39,19 @@ export default function LoginPage() {
     setLoading(true);
     const res = await login(email.trim(), password);
     setLoading(false);
-    if (!res.ok) return setError(res.error ?? 'Login failed.');
+    if (!res.ok) {
+      setUnconfirmed(/not confirmed/i.test(res.error ?? ''));
+      return setError(/not confirmed/i.test(res.error ?? '') ? 'Please verify your email first — check your inbox for the confirmation link.' : res.error ?? 'Login failed.');
+    }
     // Route by the role stored in the database, not the login page used.
     navigate(res.role === 'doctor' ? '/doctor/dashboard' : '/patient/dashboard');
+  };
+
+  const handleResend = async () => {
+    setError('');
+    const res = await resendVerification(email.trim(), isPatient ? 'patient' : 'doctor');
+    if (res.ok) { setUnconfirmed(false); setInfo('A new verification email has been sent.'); }
+    else setError(res.error ?? 'Could not resend the verification email.');
   };
 
   const handleForgot = async () => {
@@ -42,7 +66,7 @@ export default function LoginPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, var(--primary-light) 0%, var(--primary-light) 100%)',
+      background: 'transparent',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '1rem'
     }}>
@@ -61,13 +85,13 @@ export default function LoginPage() {
             {/* Logo */}
             <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
               <div style={{
-                width: 56, height: 56, background: isPatient ? 'var(--grad)' : 'var(--navy)',
+                width: 56, height: 56, background: 'var(--grad)',
                 borderRadius: 16, display: 'flex', alignItems: 'center',
                 justifyContent: 'center', margin: '0 auto 0.75rem'
               }}>
                 {isPatient
-                  ? <Heart size={28} color="white" fill="white" />
-                  : <Stethoscope size={28} color="white" />
+                  ? <Heart size={28} color="#0b0d12" fill="#0b0d12" />
+                  : <Stethoscope size={28} color="#0b0d12" />
                 }
               </div>
               <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gray-800)' }}>
@@ -81,6 +105,9 @@ export default function LoginPage() {
             {error && (
               <div className="alert alert-danger" role="alert" style={{ marginBottom: '1rem' }}>
                 {error}
+                {unconfirmed && email.trim() && (
+                  <button type="button" className="btn btn-outline btn-sm" style={{ marginLeft: 'auto' }} onClick={handleResend}>Resend email</button>
+                )}
               </div>
             )}
             {info && (
@@ -92,8 +119,9 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} style={{ padding: '0 2rem 2rem' }}>
             <div className="form-group">
-              <label className="form-label">Email Address</label>
+              <label className="form-label" htmlFor="login-email">Email Address</label>
               <input
+                id="login-email"
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
@@ -104,8 +132,9 @@ export default function LoginPage() {
             </div>
 
             <div className="form-group" style={{ position: 'relative' }}>
-              <label className="form-label">Password</label>
+              <label className="form-label" htmlFor="login-password">Password</label>
               <input
+                id="login-password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
@@ -117,6 +146,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
                 style={{
                   position: 'absolute', right: '0.75rem', top: '2.1rem',
                   background: 'none', border: 'none', cursor: 'pointer', color: 'var(--gray-500)'
@@ -135,13 +165,11 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              className={`btn ${isPatient ? 'btn-primary' : ''}`}
+              className="btn btn-primary"
               disabled={loading}
               style={{
                 width: '100%', justifyContent: 'center', padding: '0.75rem',
                 fontSize: '1rem', marginTop: '0.5rem',
-                background: isPatient ? undefined : 'var(--navy)',
-                color: isPatient ? undefined : 'white'
               }}
             >
               {loading ? (

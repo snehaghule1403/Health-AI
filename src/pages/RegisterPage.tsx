@@ -76,7 +76,7 @@ export default function RegisterPage() {
 
   return (
     <div style={{
-      minHeight: '100vh', background: 'linear-gradient(135deg, var(--primary-light) 0%, var(--primary-light) 100%)',
+      minHeight: '100vh', background: 'transparent',
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
     }}>
       <div style={{ width: '100%', maxWidth: 560 }}>
@@ -92,13 +92,13 @@ export default function RegisterPage() {
           <div style={{ padding: '2rem 2rem 0' }}>
             <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
               <div style={{
-                width: 56, height: 56, background: isPatient ? 'var(--grad)' : '#1e3a5f',
+                width: 56, height: 56, background: 'var(--grad)',
                 borderRadius: 16, display: 'flex', alignItems: 'center',
                 justifyContent: 'center', margin: '0 auto 0.75rem'
               }}>
                 {isPatient
-                  ? <Heart size={28} color="white" fill="white" />
-                  : <Stethoscope size={28} color="white" />
+                  ? <Heart size={28} color="#0b0d12" fill="#0b0d12" />
+                  : <Stethoscope size={28} color="#0b0d12" />
                 }
               </div>
               <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gray-800)' }}>
@@ -119,30 +119,30 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} style={{ padding: '0 2rem 2rem' }}>
             <div className="form-row">
               <div className="form-group">
-                <label className="form-label">Full Name *</label>
-                <input value={form.name} onChange={set('name')} placeholder="Your full name" required />
+                <label className="form-label" htmlFor="registerpage-f1">Full Name *</label>
+                <input id="registerpage-f1" value={form.name} onChange={set('name')} placeholder="Your full name" required />
               </div>
               <div className="form-group">
-                <label className="form-label">Phone Number</label>
-                <input value={form.phone} onChange={set('phone')} placeholder="+91 98765 43210" />
+                <label className="form-label" htmlFor="registerpage-f2">Phone Number</label>
+                <input id="registerpage-f2" value={form.phone} onChange={set('phone')} placeholder="+91 98765 43210" />
               </div>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Email Address *</label>
-              <input type="email" value={form.email} onChange={set('email')} placeholder="your@email.com" required />
+              <label className="form-label" htmlFor="registerpage-f3">Email Address *</label>
+              <input id="registerpage-f3" type="email" value={form.email} onChange={set('email')} placeholder="your@email.com" required />
             </div>
 
             {isPatient && (
               <>
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Date of Birth</label>
-                    <input type="date" value={form.dateOfBirth} onChange={set('dateOfBirth')} />
+                    <label className="form-label" htmlFor="registerpage-f4">Date of Birth</label>
+                    <input id="registerpage-f4" type="date" value={form.dateOfBirth} onChange={set('dateOfBirth')} />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Gender</label>
-                    <select value={form.gender} onChange={set('gender')}>
+                    <label className="form-label" htmlFor="registerpage-f5">Gender</label>
+                    <select id="registerpage-f5" value={form.gender} onChange={set('gender')}>
                       <option value="">Select</option>
                       <option>Male</option>
                       <option>Female</option>
@@ -152,8 +152,8 @@ export default function RegisterPage() {
                   </div>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Blood Group</label>
-                  <select value={form.bloodGroup} onChange={set('bloodGroup')}>
+                  <label className="form-label" htmlFor="registerpage-f6">Blood Group</label>
+                  <select id="registerpage-f6" value={form.bloodGroup} onChange={set('bloodGroup')}>
                     <option value="">Select blood group</option>
                     {['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'].map(g => (
                       <option key={g}>{g}</option>
@@ -167,12 +167,12 @@ export default function RegisterPage() {
               <>
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Medical Registration ID *</label>
-                    <input value={form.medicalRegistrationId} onChange={set('medicalRegistrationId')} placeholder="MH-2020-XXXXX" required />
+                    <label className="form-label" htmlFor="registerpage-f7">Medical Registration ID *</label>
+                    <input id="registerpage-f7" value={form.medicalRegistrationId} onChange={set('medicalRegistrationId')} placeholder="MH-2020-XXXXX" required />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Specialization *</label>
-                    <select value={form.specialization} onChange={set('specialization')} required>
+                    <label className="form-label" htmlFor="registerpage-f8">Specialization *</label>
+                    <select id="registerpage-f8" value={form.specialization} onChange={set('specialization')} required>
                       <option value="">Select</option>
                       {['General Physician', 'Cardiologist', 'Neurologist', 'Orthopedist', 'Pediatrician', 'Dermatologist', 'Gynecologist', 'Radiologist', 'Other'].map(s => (
                         <option key={s}>{s}</option>
@@ -181,20 +181,20 @@ export default function RegisterPage() {
                   </div>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Hospital / Clinic *</label>
-                  <input value={form.hospital} onChange={set('hospital')} placeholder="Hospital or clinic name" required />
+                  <label className="form-label" htmlFor="registerpage-f9">Hospital / Clinic *</label>
+                  <input id="registerpage-f9" value={form.hospital} onChange={set('hospital')} placeholder="Hospital or clinic name" required />
                 </div>
               </>
             )}
 
             <div className="form-row">
               <div className="form-group">
-                <label className="form-label">Password *</label>
-                <input type="password" value={form.password} onChange={set('password')} placeholder="Minimum 8 characters" autoComplete="new-password" required />
+                <label className="form-label" htmlFor="registerpage-f10">Password *</label>
+                <input id="registerpage-f10" type="password" value={form.password} onChange={set('password')} placeholder="Minimum 8 characters" autoComplete="new-password" required />
               </div>
               <div className="form-group">
-                <label className="form-label">Confirm Password *</label>
-                <input type="password" value={form.confirmPassword} onChange={set('confirmPassword')} placeholder="Repeat password" required />
+                <label className="form-label" htmlFor="registerpage-f11">Confirm Password *</label>
+                <input id="registerpage-f11" type="password" value={form.confirmPassword} onChange={set('confirmPassword')} placeholder="Repeat password" required />
               </div>
             </div>
 

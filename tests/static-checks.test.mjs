@@ -13,7 +13,7 @@ const src = walk('src').filter((f) => /\.(ts|tsx)$/.test(f)).map((f) => [f, read
 test('frontend never references server-only secrets', () => {
   for (const [f, s] of src) {
     // Flags reading server env vars or embedding key material — not UI text naming a variable.
-    assert.ok(!/SERVICE_ROLE|sk-ant-|process\.env|import\.meta\.env\.(?!VITE_)/.test(s), `${f} references a server secret`);
+    assert.ok(!/SERVICE_ROLE|sk-ant-|process\.env|import\.meta\.env\.(?!VITE_|DEV\b|PROD\b|MODE\b)/.test(s), `${f} references a server secret`);
   }
 });
 
@@ -58,4 +58,19 @@ test('emergency QR links use the public site URL, not the current origin', () =>
   const site = readFileSync('src/lib/siteUrl.ts', 'utf8');
   const def = site.match(/DEFAULT_PUBLIC_SITE_URL = '([^']+)'/)?.[1];
   assert.equal(def, 'https://health-ai-omega-three.vercel.app', 'default must be the public production domain');
+});
+
+test('auth email links never use the current origin on deployed builds', () => {
+  const ctx = readFileSync('src/context/AppContext.tsx', 'utf8');
+  assert.ok(!/window\.location\.origin\}\/(login|reset-password)/.test(ctx), 'auth redirects must use authRedirectOrigin()');
+  assert.match(ctx, /emailRedirectTo: `\$\{authRedirectOrigin\(\)\}/);
+  assert.match(ctx, /redirectTo: `\$\{authRedirectOrigin\(\)\}\/reset-password`/);
+});
+
+test('voice assistant can use the microphone and stores no audio', () => {
+  const vercel = JSON.parse(readFileSync('vercel.json', 'utf8'));
+  const policy = vercel.headers.flatMap((h) => h.headers).find((h) => h.key === 'Permissions-Policy')?.value ?? '';
+  assert.match(policy, /microphone=\(self\)/);
+  const speech = readFileSync('src/lib/speech.ts', 'utf8');
+  assert.ok(!/MediaRecorder|getUserMedia|supabase/.test(speech), 'speech module must not record or upload audio');
 });

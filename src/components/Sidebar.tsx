@@ -73,9 +73,9 @@ export default function Sidebar() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{
             width: 36, height: 36, borderRadius: '50%',
-            background: isPatient ? 'var(--grad)' : '#16a34a',
+            background: 'var(--grad)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: 'white', fontWeight: 700, fontSize: '0.85rem', flexShrink: 0
+            color: '#0b0d12', fontWeight: 700, fontSize: '0.85rem', flexShrink: 0
           }}>
             {getInitials(currentUser.name)}
           </div>

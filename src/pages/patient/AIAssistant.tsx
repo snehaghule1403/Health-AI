@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Brain, Trash2, AlertCircle, Sparkles } from 'lucide-react';
+import { Send, Brain, Trash2, AlertCircle, Sparkles, Mic, MicOff, Volume2, Pause, Play, Square } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { apiPost } from '../../lib/api';
 import type { Symptom } from '../../types';
+import { useSpeechInput, useSpeechOutput, VOICE_LANGS, type VoiceLang } from '../../lib/speech';
 
 const SUGGESTED = [
   'Explain my latest blood report.',
@@ -31,6 +32,13 @@ export default function AIAssistant() {
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  // ─── Voice ───
+  const [lang, setLang] = useState<VoiceLang>('en');
+  const [autoSpeak, setAutoSpeak] = useState(true);
+  const lastInputWasVoice = useRef(false);
+  const tts = useSpeechOutput();
+  const mic = useSpeechInput(lang, (text) => { lastInputWasVoice.current = true; void sendMessage(text); });
+
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages, loading]);
@@ -44,12 +52,17 @@ export default function AIAssistant() {
     setInput('');
     setChatError('');
     setLoading(true);
+    tts.stop();
+    const spoken = lastInputWasVoice.current;
+    lastInputWasVoice.current = false;
 
     addChatMessage({ id: `local-${Date.now()}`, role: 'user', content: msg, timestamp: new Date().toISOString() });
     try {
       // The server calls the AI provider and saves both messages.
-      const { reply } = await apiPost<{ reply: string }>('/api/ai/chat', { message: msg });
-      addChatMessage({ id: `local-${Date.now() + 1}`, role: 'assistant', content: reply, timestamp: new Date().toISOString() });
+      const { reply } = await apiPost<{ reply: string }>('/api/ai/chat', { message: msg, language: lang });
+      const replyId = `local-${Date.now() + 1}`;
+      addChatMessage({ id: replyId, role: 'assistant', content: reply, timestamp: new Date().toISOString() });
+      if (spoken && autoSpeak) tts.speak(replyId, reply, lang);
     } catch (e) {
       setChatError((e as Error).message);
     } finally {
@@ -131,7 +144,7 @@ export default function AIAssistant() {
 
       {/* ─── CHAT TAB ─── */}
       {activeTab === 'chat' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: '1.25rem', alignItems: 'start' }}>
+        <div className="assistant-layout">
           {/* Chat window */}
           <div className="card" style={{ display: 'flex', flexDirection: 'column', height: 600 }}>
             {/* Messages */}
@@ -159,6 +172,22 @@ export default function AIAssistant() {
                       ? <div style={{ lineHeight: 1.6 }}>{renderContent(msg.content)}</div>
                       : msg.content
                     }
+                    {msg.role === 'assistant' && tts.supported && (
+                      <div className="speak-controls" role="group" aria-label="Read reply aloud">
+                        {tts.speakingId !== msg.id ? (
+                          <button type="button" onClick={() => tts.speak(msg.id, msg.content, lang)} aria-label="Listen to this reply">
+                            <Volume2 size={14} /> Listen
+                          </button>
+                        ) : (
+                          <>
+                            {tts.paused
+                              ? <button type="button" onClick={tts.resume} aria-label="Resume reading"><Play size={14} /> Resume</button>
+                              : <button type="button" onClick={tts.pause} aria-label="Pause reading"><Pause size={14} /> Pause</button>}
+                            <button type="button" onClick={tts.stop} aria-label="Stop reading"><Square size={13} /> Stop</button>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -189,26 +218,66 @@ export default function AIAssistant() {
 
             {/* Input */}
             <div style={{ padding: '1rem', borderTop: '1px solid var(--gray-100)' }}>
+              <div className="voice-bar">
+                <label htmlFor="voice-lang" className="sr-only">Language</label>
+                <select id="voice-lang" value={lang} onChange={e => { mic.stop(); tts.stop(); setLang(e.target.value as VoiceLang); }} style={{ width: 'auto' }}>
+                  {VOICE_LANGS.map(l => <option key={l.id} value={l.id}>{l.label}</option>)}
+                </select>
+                {tts.supported && (
+                  <label className="voice-toggle">
+                    <input type="checkbox" checked={autoSpeak} onChange={e => { setAutoSpeak(e.target.checked); if (!e.target.checked) tts.stop(); }} />
+                    Read replies aloud after voice questions
+                  </label>
+                )}
+                {tts.speakingId && (
+                  <button type="button" className="btn btn-outline btn-sm" onClick={tts.stop} style={{ marginLeft: 'auto' }}>
+                    <Square size={12} /> Stop speaking
+                  </button>
+                )}
+              </div>
+              {(mic.error || tts.notice) && (
+                <div className="alert alert-warning" role="alert" style={{ marginBottom: '0.6rem', padding: '0.55rem 0.8rem' }}>
+                  <AlertCircle size={14} style={{ flexShrink: 0 }} /> {mic.error || tts.notice}
+                </div>
+              )}
               <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  type="button"
+                  className={`btn mic-btn ${mic.listening ? 'listening' : 'btn-outline'}`}
+                  onClick={mic.listening ? mic.stop : mic.start}
+                  disabled={loading || !mic.supported}
+                  aria-pressed={mic.listening}
+                  aria-label={mic.listening ? 'Stop listening' : 'Speak your question'}
+                  title={mic.supported ? (mic.listening ? 'Stop listening' : 'Speak your question') : 'Voice input is not supported in this browser — try Chrome or Edge'}
+                >
+                  {mic.listening ? <MicOff size={16} /> : <Mic size={16} />}
+                </button>
+                <label htmlFor="chat-input" className="sr-only">Your question</label>
                 <input
-                  value={input}
+                  id="chat-input"
+                  value={mic.listening ? mic.interim : input}
+                  readOnly={mic.listening}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-                  placeholder="Ask a health question..."
+                  placeholder={mic.listening ? 'Listening… speak now' : 'Type or speak a health question…'}
                   style={{ flex: 1 }}
                 />
                 <button
                   className="btn btn-primary"
                   onClick={() => sendMessage()}
-                  disabled={!input.trim() || loading}
+                  disabled={!input.trim() || loading || mic.listening}
                   style={{ padding: '0.55rem 1rem' }}
+                  aria-label="Send message"
                 >
                   <Send size={16} />
                 </button>
               </div>
+              <p style={{ fontSize: '0.72rem', color: 'var(--gray-400)', marginTop: '0.5rem' }}>
+                Voice uses your browser’s speech service while the mic is on. HealthAI never records or stores audio.
+              </p>
               {chatMessages.length > 0 && (
                 <button
-                  onClick={clearChat}
+                  onClick={() => { tts.stop(); clearChat(); }}
                   style={{ background: 'none', border: 'none', color: 'var(--gray-400)', fontSize: '0.75rem', cursor: 'pointer', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
                 >
                   <Trash2 size={12} /> Clear chat
@@ -272,8 +341,8 @@ export default function AIAssistant() {
             </div>
             <div className="card-body">
               <div className="form-group">
-                <label className="form-label">Symptom *</label>
-                <input
+                <label className="form-label" htmlFor="aiassistant-f1">Symptom *</label>
+                <input id="aiassistant-f1"
                   value={symptomForm.symptom}
                   onChange={e => setSymptomForm({ ...symptomForm, symptom: e.target.value })}
                   placeholder="e.g., Fatigue, Headache, Nausea"
@@ -281,16 +350,16 @@ export default function AIAssistant() {
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label className="form-label">Duration</label>
-                  <input
+                  <label className="form-label" htmlFor="aiassistant-f2">Duration</label>
+                  <input id="aiassistant-f2"
                     value={symptomForm.duration}
                     onChange={e => setSymptomForm({ ...symptomForm, duration: e.target.value })}
                     placeholder="e.g., 5 days"
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Severity</label>
-                  <select
+                  <label className="form-label" htmlFor="aiassistant-f3">Severity</label>
+                  <select id="aiassistant-f3"
                     value={symptomForm.severity}
                     onChange={e => setSymptomForm({ ...symptomForm, severity: e.target.value as typeof SEVERITY_LEVELS[number] })}
                   >
@@ -299,16 +368,16 @@ export default function AIAssistant() {
                 </div>
               </div>
               <div className="form-group">
-                <label className="form-label">Frequency</label>
-                <input
+                <label className="form-label" htmlFor="aiassistant-f4">Frequency</label>
+                <input id="aiassistant-f4"
                   value={symptomForm.frequency}
                   onChange={e => setSymptomForm({ ...symptomForm, frequency: e.target.value })}
                   placeholder="e.g., Constant, Intermittent, Morning only"
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Notes</label>
-                <textarea
+                <label className="form-label" htmlFor="aiassistant-f5">Notes</label>
+                <textarea id="aiassistant-f5"
                   value={symptomForm.notes}
                   onChange={e => setSymptomForm({ ...symptomForm, notes: e.target.value })}
                   placeholder="Any additional details..."

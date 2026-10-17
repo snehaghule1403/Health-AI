@@ -7,7 +7,7 @@ import { useApp } from '../../context/AppContext';
 import type { HealthRecord } from '../../types';
 import { apiPost } from '../../lib/api';
 import { extractText } from '../../lib/ocr';
-import { ALLOWED_MIME, MAX_FILE_BYTES } from '../../lib/supabase';
+import { ALLOWED_MIME, MAX_FILE_BYTES, fileMime } from '../../lib/supabase';
 import AIAnalysisView from '../../components/AIAnalysisView';
 
 const RECORD_TYPES = ['Blood Report', 'MRI', 'CT Scan', 'X-Ray', 'Prescription', 'Vaccination', 'Other'] as const;
@@ -68,7 +68,7 @@ export default function HealthRecords() {
   const pickFile = (f: File | null) => {
     setFormError('');
     if (!f) return setFile(null);
-    if (!ALLOWED_MIME.includes(f.type)) { setFile(null); return setFormError('Only PDF, PNG and JPEG files are supported.'); }
+    if (!ALLOWED_MIME.includes(fileMime(f))) { setFile(null); return setFormError('Only PDF, PNG and JPEG files are supported.'); }
     if (f.size > MAX_FILE_BYTES) { setFile(null); return setFormError('File must be 10 MB or smaller.'); }
     setFile(f);
     if (!form.name) setForm(prev => ({ ...prev, name: f.name.replace(/\.[^.]+$/, '') }));

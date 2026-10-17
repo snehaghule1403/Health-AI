@@ -28,3 +28,10 @@ export async function fetchAll<T>(
     if (!data || data.length < pageSize) return out;
   }
 }
+
+/** The file's MIME type, falling back to its extension when the browser reports none. */
+export function fileMime(file: File): string {
+  if (file.type) return file.type;
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+  return ({ pdf: 'application/pdf', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg' } as Record<string, string>)[ext] ?? '';
+}
