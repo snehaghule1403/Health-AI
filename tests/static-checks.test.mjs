@@ -74,3 +74,14 @@ test('voice assistant can use the microphone and stores no audio', () => {
   const speech = readFileSync('src/lib/speech.ts', 'utf8');
   assert.ok(!/MediaRecorder|getUserMedia|supabase/.test(speech), 'speech module must not record or upload audio');
 });
+
+test('login page always offers the form and a way to switch accounts', () => {
+  const page = readFileSync('src/pages/LoginPage.tsx', 'utf8');
+  // Auto-continue is allowed only for an email-verification callback.
+  assert.match(page, /fromEmailLink && ready && currentUser/);
+  assert.match(page, /Log out & switch account/);
+  assert.ok(!/useState\('[^']+@[^']+'\)/.test(page), 'no hardcoded email defaults');
+  const ctx = readFileSync('src/context/AppContext.tsx', 'utf8');
+  assert.match(ctx, /signOut\(\{ scope: 'local' \}\)/, 'logout must always clear the local session');
+  assert.match(ctx, /loadSeq/, 'stale loads from a previous account must be discarded');
+});

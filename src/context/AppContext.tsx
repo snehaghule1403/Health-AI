@@ -126,6 +126,8 @@ interface AppState {
 
   login: (email: string, password: string) => Promise<{ ok: boolean; error?: string; role?: string }>;
   logout: () => Promise<void>;
+  /** True when Supabase ended the session on its own (expired / revoked), not via Log out. */
+  sessionExpired: boolean;
   register: (input: RegisterInput) => Promise<{ ok: boolean; error?: string; needsConfirmation?: boolean }>;
   resetPassword: (email: string) => Promise<{ ok: boolean; error?: string }>;
   resendVerification: (email: string, role: 'patient' | 'doctor') => Promise<{ ok: boolean; error?: string }>;
@@ -167,6 +169,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const loadedUserId = useRef<string | null>(null);
+  // Bumped on every load and sign-out, so a slow load for one account can
+  // never write its data into the session of another.
+  const loadSeq = useRef(0);
+  const userSignedOut = useRef(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [records, setRecords] = useState<HealthRecord[]>([]);
   const [medicines, setMedicines] = useState<Medicine[]>([]);
@@ -178,6 +185,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [symptoms, setSymptoms] = useState<Symptom[]>([]);
   const [emergencyProfiles, setEmergencyProfiles] = useState<AppState['emergencyProfiles']>([]);
 
+  const resetSession = () => {
+    loadSeq.current++;
+    loadedUserId.current = null;
+    setCurrentUser(null);
+    setError(null);
+    clearData();
+  };
+
   const fail = (msg: string) => { setError(msg); return null; };
 
   const clearData = () => {
@@ -187,13 +202,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   /** Loads everything visible to this user. RLS restricts rows to own data or consented patients. */
   const loadAll = useCallback(async (userId: string) => {
+    const seq = ++loadSeq.current;
+    const stale = () => seq !== loadSeq.current;
     setLoading(true);
     try {
       const { data: me, error: meErr } = await supabase.from('profiles').select('*').eq('id', userId).single();
+      if (stale()) return;
       if (meErr || !me) throw new Error('Your profile could not be loaded.');
       const self = toUser(me);
-      setCurrentUser(self);
-      loadedUserId.current = self.id;
 
       const q = (table: string, order: string, asc = false) =>
         fetchAll<Row>((a, b) => supabase.from(table).select('*').order(order, { ascending: asc }).range(a, b));
@@ -210,6 +226,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         q('symptoms', 'created_at'),
         q('emergency_profiles', 'updated_at'),
       ]);
+      const chat = self.role === 'patient' ? await q('chat_messages', 'created_at', true) : [];
+      if (stale()) return;
+      setCurrentUser(self);
+      loadedUserId.current = self.id;
       const allUsers = profiles.map(toUser);
       setUsers(allUsers);
       setRecords(recs.map(toRecord));
@@ -228,14 +248,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           history: audit.filter(a => a.consent_id === c.id).map(a => ({ action: a.action, timestamp: a.created_at })),
         } as ConsentRecord;
       }));
-      if (self.role === 'patient') {
-        const chat = await q('chat_messages', 'created_at', true);
-        setChatMessages(chat.map(m => ({ id: m.id, role: m.role, content: m.content, timestamp: m.created_at })));
-      }
+      setChatMessages(chat.map(m => ({ id: m.id, role: m.role, content: m.content, timestamp: m.created_at })));
     } catch (e) {
-      setError((e as Error).message || 'Could not load your data.');
+      if (!stale()) setError((e as Error).message || 'Could not load your data.');
     } finally {
-      setLoading(false);
+      if (!stale()) setLoading(false);
     }
   }, []);
 
@@ -246,12 +263,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setReady(true);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT' || !session) { loadedUserId.current = null; setCurrentUser(null); clearData(); return; }
+      if (event === 'SIGNED_OUT' || !session) {
+        if (loadedUserId.current && !userSignedOut.current) setSessionExpired(true);
+        userSignedOut.current = false;
+        resetSession();
+        return;
+      }
+      if (event === 'SIGNED_IN') setSessionExpired(false);
       // Email-verification links sign the user in on arrival; load their data.
       // Deferred so we never await Supabase calls inside the auth callback.
+      // A different account signing in (e.g. in another tab) replaces the old data.
       if (event === 'SIGNED_IN') {
         const uid = session.user.id;
-        setTimeout(() => { if (loadedUserId.current !== uid) void loadAll(uid); }, 0);
+        setTimeout(() => {
+          if (loadedUserId.current === uid) return;
+          if (loadedUserId.current) resetSession();
+          void loadAll(uid);
+        }, 0);
       }
     });
     return () => sub.subscription.unsubscribe();
@@ -262,14 +290,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // ─── Auth ──────────────────────────────────────────────────────────────────
   const login: AppState['login'] = async (email, password) => {
     if (!supabaseConfigured) return { ok: false, error: 'Supabase is not configured for this deployment.' };
+    // Switching accounts: end the current session first so nothing carries over.
+    if (loadedUserId.current) { userSignedOut.current = true; await supabase.auth.signOut({ scope: 'local' }); resetSession(); }
+    setSessionExpired(false);
     const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
-    if (err || !data.user) return { ok: false, error: err?.message === 'Invalid login credentials' ? 'Invalid email or password.' : err?.message ?? 'Login failed.' };
+    if (err || !data.user) return { ok: false, error: friendlyAuthError(err?.message) };
+    loadedUserId.current = data.user.id; // stop the SIGNED_IN listener loading twice
     await loadAll(data.user.id);
     const { data: p } = await supabase.from('profiles').select('role').eq('id', data.user.id).single();
     return { ok: true, role: p?.role };
   };
 
-  const logout = async () => { await supabase.auth.signOut(); setCurrentUser(null); clearData(); };
+  // 'local' always clears this browser's session, even if the server call fails.
+  const logout = async () => {
+    userSignedOut.current = true;
+    setSessionExpired(false);
+    await supabase.auth.signOut({ scope: 'local' });
+    resetSession();
+  };
 
   const register: AppState['register'] = async (input) => {
     if (!supabaseConfigured) return { ok: false, error: 'Supabase is not configured for this deployment.' };
@@ -493,16 +531,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<AppState>(() => ({
     ready, configured: supabaseConfigured, loading, error, clearError: () => setError(null),
     currentUser, users, records, medicines, vaccines, wellness, measurements, consents, chatMessages, symptoms, emergencyProfiles,
-    login, logout, register, resetPassword, resendVerification, updateProfile, refresh,
+    login, logout, sessionExpired, register, resetPassword, resendVerification, updateProfile, refresh,
     addRecord, updateRecord, deleteRecord, getFileUrl, downloadFile,
     addMedicine, updateMedicine, deleteMedicine, addVaccine, updateVaccine, deleteVaccine,
     addWellnessEntry, updateTodayWellness, deleteWellnessEntry, addMeasurement, deleteMeasurement,
     addConsent: upsertConsent, updateConsent: upsertConsent,
     addChatMessage, clearChat, addSymptom, saveEmergency, setEmergencyAccess, trendsFor,
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [ready, loading, error, currentUser, users, records, medicines, vaccines, wellness, measurements, consents, chatMessages, symptoms, emergencyProfiles, trendsFor]);
+  }), [ready, loading, error, sessionExpired, currentUser, users, records, medicines, vaccines, wellness, measurements, consents, chatMessages, symptoms, emergencyProfiles, trendsFor]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+}
+
+function friendlyAuthError(msg?: string): string {
+  if (!msg) return 'Sign-in failed. Please try again.';
+  if (/invalid login credentials/i.test(msg)) return 'Incorrect email or password.';
+  if (/email not confirmed/i.test(msg)) return 'Email not confirmed — please verify your email first. Check your inbox for the confirmation link.';
+  if (/rate limit|too many/i.test(msg)) return 'Too many attempts. Please wait a minute and try again.';
+  if (/fetch|network/i.test(msg)) return 'Could not reach the server. Check your connection and try again.';
+  return msg;
 }
 
 export function useApp() {

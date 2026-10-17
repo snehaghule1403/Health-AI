@@ -30,13 +30,32 @@ const getRecognition = (): RecognitionCtor | undefined => {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition;
 };
 
+/**
+ * Chromium browsers that expose SpeechRecognition but have no speech service
+ * behind it — every attempt fails with a "network" error even when online.
+ */
+const browserWithoutSpeechService = (): string | null => {
+  const nav = navigator as Navigator & { brave?: unknown };
+  const ua = navigator.userAgent;
+  if (nav.brave) return 'Brave';
+  if (/OPR\//.test(ua)) return 'Opera';
+  if (/Vivaldi/.test(ua)) return 'Vivaldi';
+  if (/Electron\//.test(ua)) return 'this embedded browser';
+  return null;
+};
+
+const SERVICE_UNREACHABLE =
+  'Your browser’s speech-recognition service could not be reached. Your internet is fine — this happens when a VPN, firewall or ' +
+  'ad/privacy blocker blocks the browser’s speech service, or in browsers that do not include one. Try Chrome or Edge with blockers ' +
+  'paused for this site, or type your question instead.';
+
 const MIC_ERRORS: Record<string, string> = {
-  'not-allowed': 'Microphone access was blocked. Allow it in your browser’s site settings, or type your question instead.',
-  'service-not-allowed': 'Speech recognition is not allowed in this browser. Please type your question instead.',
-  'audio-capture': 'No microphone was found. Check that one is connected, or type your question instead.',
-  'network': 'Speech recognition needs an internet connection. Please try again or type instead.',
-  'language-not-supported': 'This browser cannot recognise speech in the selected language. Try English, or type instead.',
-  'no-speech': 'No speech was heard. Tap the microphone and try again.',
+  'not-allowed': 'Microphone access was blocked. Click the lock icon in the address bar, allow the microphone for this site, then try again — or type your question.',
+  'service-not-allowed': 'Speech recognition is turned off in this browser. Try Chrome or Edge, or type your question instead.',
+  'audio-capture': 'No microphone was found. Check that one is connected and not used by another app, or type your question instead.',
+  'language-not-supported': 'This browser cannot recognise speech in the selected language. Switch to English for voice, or type in any language.',
+  'no-speech': 'No speech was heard. Tap the microphone and speak clearly, or type your question.',
+  'bad-grammar': 'Voice input stopped unexpectedly. Please try again or type your question.',
 };
 
 /** Speech-to-text. `onFinal` receives the finished transcript. */
@@ -54,34 +73,52 @@ export function useSpeechInput(lang: VoiceLang, onFinal: (text: string) => void)
 
   const start = useCallback(() => {
     const Ctor = getRecognition();
-    if (!Ctor) { setError('Voice input is not supported in this browser. Try Chrome or Edge, or type your question.'); return; }
-    rec.current?.abort();
-    const r = new Ctor();
-    r.lang = bcp47(lang);
-    r.interimResults = true;
-    r.continuous = false;
-    r.maxAlternatives = 1;
-    finalRef.current = '';
-    r.onresult = (e) => {
-      let live = '';
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const res = e.results[i];
-        if (res.isFinal) finalRef.current += res[0].transcript;
-        else live += res[0].transcript;
-      }
-      setInterim((finalRef.current + live).trim());
-    };
-    r.onerror = (e) => { if (e.error !== 'aborted') setError(MIC_ERRORS[e.error] ?? 'Voice input stopped unexpectedly. Please try again.'); };
-    r.onend = () => {
-      setListening(false);
-      setInterim('');
-      const text = finalRef.current.trim();
-      if (text) onFinalRef.current(text);
+    if (!Ctor) { setError('Voice input is not supported in this browser. Use Chrome or Edge, or type your question.'); return; }
+    const noService = browserWithoutSpeechService();
+    if (noService) { setError(`Voice input does not work in ${noService} because it has no speech-recognition service. Use Chrome or Edge, or type your question.`); return; }
+    if (!navigator.onLine) { setError('You appear to be offline. Voice input needs a connection — type your question instead.'); return; }
+
+    // The browser's speech service sometimes drops the first request after
+    // the mic permission prompt; one automatic retry fixes most "network" errors.
+    let retried = false;
+    const run = () => {
+      rec.current?.abort();
+      const r = new Ctor();
+      r.lang = bcp47(lang);
+      r.interimResults = true;
+      r.continuous = false;
+      r.maxAlternatives = 1;
+      finalRef.current = '';
+      let retryPending = false;
+      r.onresult = (e) => {
+        let live = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const res = e.results[i];
+          if (res.isFinal) finalRef.current += res[0].transcript;
+          else live += res[0].transcript;
+        }
+        setInterim((finalRef.current + live).trim());
+      };
+      r.onerror = (e) => {
+        if (e.error === 'aborted') return;
+        if (e.error === 'network' && !retried && !finalRef.current) { retried = true; retryPending = true; return; }
+        setError(e.error === 'network'
+          ? (navigator.onLine ? SERVICE_UNREACHABLE : 'You appear to be offline. Type your question instead.')
+          : MIC_ERRORS[e.error] ?? 'Voice input stopped unexpectedly. Please try again or type your question.');
+      };
+      r.onend = () => {
+        if (retryPending && rec.current === r) { window.setTimeout(run, 350); return; }
+        setListening(false);
+        setInterim('');
+        const text = finalRef.current.trim();
+        if (text) onFinalRef.current(text);
+      };
+      rec.current = r;
+      try { r.start(); setListening(true); }
+      catch { setListening(false); setError('Could not start the microphone. Please try again or type your question.'); }
     };
     setError('');
-    rec.current = r;
-    try { r.start(); setListening(true); }
-    catch { setError('Could not start the microphone. Please try again.'); }
+    run();
   }, [lang]);
 
   useEffect(() => () => rec.current?.abort(), []);

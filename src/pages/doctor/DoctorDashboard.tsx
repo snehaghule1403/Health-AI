@@ -60,7 +60,7 @@ export default function DoctorDashboard() {
       {/* Stats */}
       <div className="grid-4" style={{ marginBottom: '2rem' }}>
         {statCards.map((card, i) => (
-          <div key={i} className="stat-card">
+          <div key={i} className="stat-card" style={{ '--accent': card.iconColor } as React.CSSProperties}>
             <div className="stat-card-icon" style={{ background: card.iconBg, color: card.iconColor }}>
               {card.icon}
             </div>

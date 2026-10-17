@@ -40,42 +40,42 @@ export default function PatientDashboard() {
 
   const statCards = [
     {
-      icon: <FileText size={20} />, iconBg: 'var(--primary-light)', iconColor: 'var(--primary)',
+      icon: <FileText size={20} />, iconBg: '', iconColor: '#3B8BFF',
       label: 'Medical Records', value: patientRecords.length, sub: 'Total uploaded',
       onClick: () => navigate('/patient/records')
     },
     {
-      icon: <Pill size={20} />, iconBg: 'var(--violet-light)', iconColor: 'var(--violet)',
+      icon: <Pill size={20} />, iconBg: '', iconColor: '#FB6F9A',
       label: 'Active Medicines', value: patientMedicines.length, sub: 'Current prescriptions',
       onClick: () => navigate('/patient/wellness')
     },
     {
-      icon: <Droplets size={20} />, iconBg: 'var(--cyan-light)', iconColor: 'var(--cyan)',
+      icon: <Droplets size={20} />, iconBg: '', iconColor: '#34E3A4',
       label: 'Water Intake', value: `${todayWellness?.waterGlasses ?? 0}/${waterGoal}`, sub: 'glasses today',
       onClick: () => navigate('/patient/wellness')
     },
     {
-      icon: <Moon size={20} />, iconBg: 'var(--violet-light)', iconColor: '#a855f7',
+      icon: <Moon size={20} />, iconBg: '', iconColor: '#A78BFA',
       label: 'Sleep', value: `${todayWellness?.sleepHours ?? 0}h`, sub: 'last night',
       onClick: () => navigate('/patient/wellness')
     },
     {
-      icon: <Dumbbell size={20} />, iconBg: 'var(--green-light)', iconColor: 'var(--green)',
+      icon: <Dumbbell size={20} />, iconBg: '', iconColor: '#4ADE80',
       label: 'Exercise', value: `${todayWellness?.exerciseMinutes ?? 0} min`, sub: 'today',
       onClick: () => navigate('/patient/wellness')
     },
     {
-      icon: <Scale size={20} />, iconBg: 'var(--yellow-light)', iconColor: 'var(--orange)',
+      icon: <Scale size={20} />, iconBg: '', iconColor: '#FBBF24',
       label: 'BMI', value: bmi, sub: bmi === '—' ? 'Add height & weight' : 'From latest weight',
       onClick: () => navigate('/patient/trends')
     },
     {
-      icon: <UserCheck size={20} />, iconBg: 'var(--green-light)', iconColor: 'var(--green)',
+      icon: <UserCheck size={20} />, iconBg: '', iconColor: '#22D3EE',
       label: 'Doctor Access', value: activeConsents.length, sub: 'doctors authorized',
       onClick: () => navigate('/patient/sharing')
     },
     {
-      icon: <TrendingUp size={20} />, iconBg: 'var(--orange-light)', iconColor: 'var(--orange)',
+      icon: <TrendingUp size={20} />, iconBg: '', iconColor: '#FF7F6B',
       label: 'Vaccines Due', value: upcomingVaccines, sub: 'upcoming or overdue',
       onClick: () => navigate('/patient/trends')
     },
@@ -109,8 +109,12 @@ export default function PatientDashboard() {
           <div
             key={i}
             className="stat-card"
-            style={{ cursor: 'pointer' }}
+            style={{ cursor: 'pointer', '--accent': card.iconColor } as React.CSSProperties}
             onClick={card.onClick}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.onClick(); } }}
+            role="button"
+            tabIndex={0}
+            aria-label={`${card.label}: ${card.value} ${card.sub}`}
           >
             <div
               className="stat-card-icon"

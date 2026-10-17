@@ -55,15 +55,15 @@ function CountUp({ to, suffix = '' }: { to: number; suffix?: string }) {
 const tint = (c: string, bg: string) => ({ '--tint': bg.replace('.14', '.28'), '--tint-bg': bg, '--tint-c': c } as CSSProperties);
 
 const FEATURES = [
-  { icon: <FileText size={24} />, c: '#8fb0d6', bg: 'rgba(143,176,214,.14)', title: 'Health Records', desc: 'Upload and organize blood reports, MRIs, prescriptions, and more in one secure place.', cls: 'wide tall' },
-  { icon: <Brain size={24} />, c: '#8fb0d6', bg: 'rgba(143,176,214,.14)', title: 'AI Report Analyzer', desc: 'Plain-language explanations of your reports with key findings and doctor questions.', cls: 'wide' },
-  { icon: <Activity size={24} />, c: '#86b9a0', bg: 'rgba(52,227,154,.14)', title: 'Wellness Tracker', desc: 'Water, sleep, exercise, weight and BMI with daily goals.', cls: '' },
-  { icon: <TrendingUp size={24} />, c: '#8fb0d6', bg: 'rgba(143,176,214,.14)', title: 'Health Trends', desc: 'Hemoglobin, blood pressure, glucose and BMI over time.', cls: '' },
-  { icon: <Share2 size={24} />, c: '#c9a27a', bg: 'rgba(255,173,77,.14)', title: 'Doctor Sharing', desc: 'Patient-controlled consent. Grant or revoke in a tap.', cls: '' },
-  { icon: <Pill size={24} />, c: '#c9b38a', bg: 'rgba(255,214,102,.14)', title: 'Medicine Tracker', desc: 'Medications, dosages, schedules and upcoming doses.', cls: '' },
-  { icon: <QrCode size={24} />, c: '#d08a8a', bg: 'rgba(255,92,122,.14)', title: 'Emergency Profile', desc: 'Blood group, allergies and emergency contacts on a public QR page.', cls: 'wide' },
-  { icon: <Heart size={24} />, c: '#8fb0d6', bg: 'rgba(143,176,214,.14)', title: 'Symptom Checker', desc: 'General health info plus questions to ask your doctor.', cls: '' },
-  { icon: <Lock size={24} />, c: '#c8d0dc', bg: 'rgba(143,176,214,.12)', title: 'Consent-Based Access', desc: 'Full control over who sees your data, with an access history.', cls: '' },
+  { icon: <FileText size={24} />, c: '#3B8BFF', bg: 'rgba(59,139,255,.14)', title: 'Health Records', desc: 'Upload and organize blood reports, MRIs, prescriptions, and more in one secure place.', cls: 'wide tall' },
+  { icon: <Brain size={24} />, c: '#A78BFA', bg: 'rgba(167,139,250,.14)', title: 'AI Report Analyzer', desc: 'Plain-language explanations of your reports with key findings and doctor questions.', cls: 'wide' },
+  { icon: <Activity size={24} />, c: '#34E3A4', bg: 'rgba(52,227,164,.14)', title: 'Wellness Tracker', desc: 'Water, sleep, exercise, weight and BMI with daily goals.', cls: '' },
+  { icon: <TrendingUp size={24} />, c: '#2DD4BF', bg: 'rgba(45,212,191,.14)', title: 'Health Trends', desc: 'Hemoglobin, blood pressure, glucose and BMI over time.', cls: '' },
+  { icon: <Share2 size={24} />, c: '#22D3EE', bg: 'rgba(34,211,238,.14)', title: 'Doctor Sharing', desc: 'Patient-controlled consent. Grant or revoke in a tap.', cls: '' },
+  { icon: <Pill size={24} />, c: '#F472B6', bg: 'rgba(244,114,182,.14)', title: 'Medicine Tracker', desc: 'Medications, dosages, schedules and upcoming doses.', cls: '' },
+  { icon: <QrCode size={24} />, c: '#FF7F6B', bg: 'rgba(255,127,107,.14)', title: 'Emergency Profile', desc: 'Blood group, allergies and emergency contacts on a public QR page.', cls: 'wide' },
+  { icon: <Heart size={24} />, c: '#FB6F9A', bg: 'rgba(251,111,154,.14)', title: 'Symptom Checker', desc: 'General health info plus questions to ask your doctor.', cls: '' },
+  { icon: <Lock size={24} />, c: '#FBBF24', bg: 'rgba(251,191,36,.14)', title: 'Consent-Based Access', desc: 'Full control over who sees your data, with an access history.', cls: '' },
 ];
 
 export default function LandingPage() {
@@ -113,11 +113,11 @@ export default function LandingPage() {
         <svg className="lp-ecg" viewBox="0 0 1100 90" preserveAspectRatio="none" aria-hidden="true">
           <defs>
             <linearGradient id="ecgGrad" x1="0" x2="1">
-              <stop offset="0" stopColor="#8fb0d6" stopOpacity="0" />
-              <stop offset=".3" stopColor="#8fb0d6" />
-              <stop offset=".6" stopColor="#8fb0d6" />
-              <stop offset=".85" stopColor="#8fb0d6" />
-              <stop offset="1" stopColor="#8fb0d6" stopOpacity="0" />
+              <stop offset="0" stopColor="#3B8BFF" stopOpacity="0" />
+              <stop offset=".3" stopColor="#3B8BFF" />
+              <stop offset=".6" stopColor="#2DD4BF" />
+              <stop offset=".85" stopColor="#A78BFA" />
+              <stop offset="1" stopColor="#A78BFA" stopOpacity="0" />
             </linearGradient>
           </defs>
           <path d="M0 50 H260 l14 -10 l12 10 H330 l10 18 l16 -66 l18 84 l14 -36 H470 l14 -8 l12 8 H640 l10 18 l16 -66 l18 84 l14 -36 H780 l14 -8 l12 8 H1100" />
@@ -126,8 +126,8 @@ export default function LandingPage() {
         {/* Floating product preview */}
         <div className="lp-preview" data-reveal>
           <span className="lp-chip-float c1"><span className="lp-dot" /> Dr. access granted</span>
-          <span className="lp-chip-float c2"><Brain size={15} color="#8fb0d6" /> AI summary ready</span>
-          <span className="lp-chip-float c3"><Shield size={15} color="#8fb0d6" /> Encrypted &amp; private</span>
+          <span className="lp-chip-float c2"><Brain size={15} color="#A78BFA" /> AI summary ready</span>
+          <span className="lp-chip-float c3"><Shield size={15} color="#34E3A4" /> Encrypted &amp; private</span>
           <div className="lp-window" data-tilt>
             <div className="lp-window-bar"><span /><span /><span /></div>
             <div className="lp-mini-grid">

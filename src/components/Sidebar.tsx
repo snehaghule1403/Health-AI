@@ -41,9 +41,10 @@ export default function Sidebar() {
   const isPatient = currentUser.role === 'patient';
   const navItems = isPatient ? PATIENT_NAV : DOCTOR_NAV;
 
-  const handleLogout = () => {
-    void logout();
-    navigate('/');
+  const handleLogout = async () => {
+    // Wait until the session is really gone before leaving the app.
+    await logout();
+    navigate(`/login/${currentUser.role}`, { replace: true });
   };
 
   const getInitials = (name: string) =>

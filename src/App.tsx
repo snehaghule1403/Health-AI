@@ -30,9 +30,9 @@ import DoctorTrends from './pages/doctor/DoctorTrends';
 import DoctorConsent from './pages/doctor/DoctorConsent';
 
 function ProtectedLayout({ requiredRole }: { requiredRole: 'patient' | 'doctor' }) {
-  const { currentUser, ready, error, clearError } = useApp();
+  const { currentUser, ready, error, clearError, sessionExpired } = useApp();
   if (!ready) return <div className="empty-state" role="status" style={{ minHeight: '100vh' }}><p>Loading…</p></div>;
-  if (!currentUser) return <Navigate to={`/login/${requiredRole}`} replace />;
+  if (!currentUser) return <Navigate to={`/login/${requiredRole}${sessionExpired ? '?reason=expired' : ''}`} replace />;
   if (currentUser.role !== requiredRole) {
     return <Navigate to={currentUser.role === 'patient' ? '/patient/dashboard' : '/doctor/dashboard'} replace />;
   }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Heart, Stethoscope, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { readAuthUrlError } from '../lib/siteUrl';
@@ -7,7 +7,7 @@ import { readAuthUrlError } from '../lib/siteUrl';
 export default function LoginPage() {
   const { role } = useParams<{ role: 'patient' | 'doctor' }>();
   const navigate = useNavigate();
-  const { login, resetPassword, resendVerification, currentUser, ready } = useApp();
+  const { login, logout, resetPassword, resendVerification, currentUser, ready } = useApp();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,17 +20,32 @@ export default function LoginPage() {
   const [info, setInfo] = useState('');
   const [unconfirmed, setUnconfirmed] = useState(false);
 
-  // Arriving from an email link: show its error, or continue once the session loads.
+  const [params] = useSearchParams();
+  // Only an email-verification callback continues automatically; a normal
+  // visit to the login page always shows the form (with a switch-account option).
+  const [fromEmailLink] = useState(() => /access_token=|type=(signup|email|magiclink)/.test(window.location.hash) || params.has('code'));
+  const [switching, setSwitching] = useState(false);
+
   useEffect(() => {
     const urlError = readAuthUrlError();
-    if (urlError) {
-      setError(urlError);
-      window.history.replaceState(null, '', window.location.pathname);
-    }
-  }, []);
+    if (urlError) setError(urlError);
+    else if (params.get('reason') === 'expired') setError('Your session expired. Please sign in again.');
+    if (urlError || params.has('reason')) window.history.replaceState(null, '', window.location.pathname);
+  }, [params]);
   useEffect(() => {
-    if (ready && currentUser) navigate(currentUser.role === 'doctor' ? '/doctor/dashboard' : '/patient/dashboard', { replace: true });
-  }, [ready, currentUser, navigate]);
+    if (fromEmailLink && ready && currentUser) navigate(currentUser.role === 'doctor' ? '/doctor/dashboard' : '/patient/dashboard', { replace: true });
+  }, [fromEmailLink, ready, currentUser, navigate]);
+
+  const dashboardPath = currentUser?.role === 'doctor' ? '/doctor/dashboard' : '/patient/dashboard';
+  const switchAccount = async () => {
+    setSwitching(true);
+    await logout();
+    setSwitching(false);
+    setEmail('');
+    setPassword('');
+    setError('');
+    setInfo('You have been signed out. Sign in with any account below.');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,6 +117,22 @@ export default function LoginPage() {
               </p>
             </div>
 
+            {ready && currentUser && !fromEmailLink && (
+              <div className="signed-in-panel" role="status">
+                <div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--gray-500)' }}>Currently signed in as</div>
+                  <div style={{ fontWeight: 600, color: 'var(--gray-900)' }}>{currentUser.name}</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--gray-500)' }}>{currentUser.email} · {currentUser.role}</div>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button type="button" className="btn btn-secondary btn-sm" onClick={() => navigate(dashboardPath)}>Continue</button>
+                  <button type="button" className="btn btn-outline btn-sm" onClick={switchAccount} disabled={switching}>
+                    {switching ? 'Signing out…' : 'Log out & switch account'}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {error && (
               <div className="alert alert-danger" role="alert" style={{ marginBottom: '1rem' }}>
                 {error}
@@ -126,7 +157,10 @@ export default function LoginPage() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                autoComplete="email"
+                autoComplete="username"
+                inputMode="email"
+                autoCapitalize="none"
+                spellCheck={false}
                 required
               />
             </div>
