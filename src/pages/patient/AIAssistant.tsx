@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Brain, Trash2, AlertCircle, Sparkles, Mic, MicOff, Volume2, Pause, Play, Square } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { apiPost } from '../../lib/api';
+import { apiPost, getAIStatus } from '../../lib/api';
 import type { Symptom } from '../../types';
 import { useSpeechInput, useSpeechOutput, VOICE_LANGS, type VoiceLang } from '../../lib/speech';
 
@@ -31,6 +31,11 @@ export default function AIAssistant() {
   const [symptomLoading, setSymptomLoading] = useState(false);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // null = unknown (still checking or status endpoint unreachable) — don't block in that case.
+  const [aiAvailable, setAiAvailable] = useState<boolean | null>(null);
+  useEffect(() => { getAIStatus().then(st => setAiAvailable(st ? st.ai : null)); }, []);
+  const aiOff = aiAvailable === false;
 
   // ─── Voice ───
   const [lang, setLang] = useState<VoiceLang>('en');
@@ -127,6 +132,16 @@ export default function AIAssistant() {
         <AlertCircle size={16} style={{ flexShrink: 0 }} />
         This AI provides educational health information only. It does not diagnose, prescribe, or replace professional medical advice.
       </div>
+
+      {aiOff && (
+        <div className="alert alert-info" role="status" style={{ marginBottom: '1.25rem' }}>
+          <AlertCircle size={16} style={{ flexShrink: 0 }} />
+          <span>
+            <strong>The AI assistant is not available yet.</strong> The server has not been connected to the AI service.
+            Your records, wellness tracking and other features work normally.
+          </span>
+        </div>
+      )}
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
@@ -245,7 +260,7 @@ export default function AIAssistant() {
                   type="button"
                   className={`btn mic-btn ${mic.listening ? 'listening' : 'btn-outline'}`}
                   onClick={mic.listening ? mic.stop : mic.start}
-                  disabled={loading || !mic.supported}
+                  disabled={loading || !mic.supported || aiOff}
                   aria-pressed={mic.listening}
                   aria-label={mic.listening ? 'Stop listening' : 'Speak your question'}
                   title={mic.supported ? (mic.listening ? 'Stop listening' : 'Speak your question') : 'Voice input is not supported in this browser — try Chrome or Edge'}
@@ -265,7 +280,7 @@ export default function AIAssistant() {
                 <button
                   className="btn btn-primary"
                   onClick={() => sendMessage()}
-                  disabled={!input.trim() || loading || mic.listening}
+                  disabled={!input.trim() || loading || mic.listening || aiOff}
                   style={{ padding: '0.55rem 1rem' }}
                   aria-label="Send message"
                 >
@@ -297,6 +312,7 @@ export default function AIAssistant() {
                   <button
                     key={i}
                     onClick={() => sendMessage(q)}
+                    disabled={aiOff}
                     style={{
                       background: 'var(--gray-50)', border: '1px solid var(--gray-200)', borderRadius: 8,
                       padding: '0.6rem 0.85rem', textAlign: 'left', cursor: 'pointer',
@@ -388,7 +404,7 @@ export default function AIAssistant() {
               <button
                 className="btn btn-primary"
                 style={{ width: '100%', justifyContent: 'center' }}
-                disabled={!symptomForm.symptom || symptomLoading}
+                disabled={!symptomForm.symptom || symptomLoading || aiOff}
                 onClick={handleSymptomCheck}
               >
                 {symptomLoading ? 'Analyzing...' : <><Sparkles size={15} /> Check Symptom</>}
