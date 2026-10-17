@@ -138,7 +138,7 @@ export default function Settings() {
               </div>
             )}
             {!isPatient && (
-              <p style={{ fontSize: '0.8rem', color: currentUser?.doctorVerified ? '#166534' : '#b45309', marginBottom: '0.75rem' }}>
+              <p style={{ fontSize: '0.8rem', color: currentUser?.doctorVerified ? 'var(--green-ink)' : '#b45309', marginBottom: '0.75rem' }}>
                 Verification status: {currentUser?.doctorVerified ? 'Verified' : 'Awaiting administrator verification'}
               </p>
             )}
@@ -172,11 +172,11 @@ export default function Settings() {
           </div>
           <div className="card-body" style={{ fontSize: '0.875rem', lineHeight: 1.8 }}>
             {ai === 'loading' ? <p>Checking…</p> : ai === null ? (
-              <p style={{ color: '#991b1b' }}><AlertCircle size={14} /> The API is not reachable. AI features are unavailable (on local <code>vite</code> dev, run <code>vercel dev</code> instead).</p>
+              <p style={{ color: 'var(--red-ink)' }}><AlertCircle size={14} /> The API is not reachable. AI features are unavailable (on local <code>vite</code> dev, run <code>vercel dev</code> instead).</p>
             ) : (
               <>
-                <div>AI provider: {ai.ai ? <strong style={{ color: '#166534' }}>Connected ({ai.model})</strong> : <strong style={{ color: '#991b1b' }}>Not configured — ANTHROPIC_API_KEY missing</strong>}</div>
-                <div>Server database access: {ai.supabase ? <strong style={{ color: '#166534' }}>Configured</strong> : <strong style={{ color: '#991b1b' }}>Missing Supabase env vars</strong>}</div>
+                <div>AI provider: {ai.ai ? <strong style={{ color: 'var(--green-ink)' }}>Connected ({ai.model})</strong> : <strong style={{ color: 'var(--red-ink)' }}>Not configured — ANTHROPIC_API_KEY missing</strong>}</div>
+                <div>Server database access: {ai.supabase ? <strong style={{ color: 'var(--green-ink)' }}>Configured</strong> : <strong style={{ color: 'var(--red-ink)' }}>Missing Supabase env vars</strong>}</div>
               </>
             )}
             <div>OCR: runs in your browser (Tesseract.js for images and scanned PDF pages, pdf.js for text PDFs).</div>
@@ -185,7 +185,7 @@ export default function Settings() {
 
         <div className="card" style={{ marginBottom: '1.25rem' }}>
           <div className="card-header"><h3><Lock size={16} style={{ marginRight: 8 }} aria-hidden />Privacy</h3></div>
-          <div className="card-body" style={{ fontSize: '0.85rem', color: '#374151', lineHeight: 1.6 }}>
+          <div className="card-body" style={{ fontSize: '0.85rem', color: 'var(--gray-700)', lineHeight: 1.6 }}>
             <p>Your records are stored in a private database and file bucket protected by row-level security. Only you, and doctors you explicitly grant access to, can read them. Revoking access takes effect on the doctor's next request.</p>
             <p style={{ marginTop: '0.5rem' }}>When you use AI features, the relevant text (your question, symptom description or report text) is sent to the AI provider (Anthropic) to generate a response. AI chat history is stored in your account and visible only to you.</p>
             <p style={{ marginTop: '0.5rem' }}>HealthAI is an educational project. It is not a medical device and has not been clinically validated or certified for regulatory compliance.</p>

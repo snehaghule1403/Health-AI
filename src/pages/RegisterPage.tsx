@@ -76,13 +76,13 @@ export default function RegisterPage() {
 
   return (
     <div style={{
-      minHeight: '100vh', background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
+      minHeight: '100vh', background: 'linear-gradient(135deg, var(--primary-light) 0%, var(--primary-light) 100%)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
     }}>
       <div style={{ width: '100%', maxWidth: 560 }}>
         <button
           className="btn btn-outline"
-          style={{ background: 'white', marginBottom: '1.25rem' }}
+          style={{ background: 'var(--surface)', marginBottom: '1.25rem' }}
           onClick={() => navigate(`/login/${role}`)}
         >
           <ArrowLeft size={16} /> Back to Login
@@ -92,7 +92,7 @@ export default function RegisterPage() {
           <div style={{ padding: '2rem 2rem 0' }}>
             <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
               <div style={{
-                width: 56, height: 56, background: isPatient ? '#2563eb' : '#1e3a5f',
+                width: 56, height: 56, background: isPatient ? 'var(--grad)' : '#1e3a5f',
                 borderRadius: 16, display: 'flex', alignItems: 'center',
                 justifyContent: 'center', margin: '0 auto 0.75rem'
               }}>
@@ -101,10 +101,10 @@ export default function RegisterPage() {
                   : <Stethoscope size={28} color="white" />
                 }
               </div>
-              <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#1f2937' }}>
+              <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gray-800)' }}>
                 {isPatient ? 'Patient Registration' : 'Doctor Registration'}
               </h1>
-              <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+              <p style={{ color: 'var(--gray-500)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
                 Create your {isPatient ? 'health record' : 'medical'} account
               </p>
             </div>
@@ -207,11 +207,11 @@ export default function RegisterPage() {
               {loading ? 'Creating Account...' : `Create ${isPatient ? 'Patient' : 'Doctor'} Account`}
             </button>
 
-            <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.875rem', color: '#6b7280' }}>
+            <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.875rem', color: 'var(--gray-500)' }}>
               Already have an account?{' '}
               <button
                 type="button"
-                style={{ background: 'none', border: 'none', color: '#2563eb', fontWeight: 600, cursor: 'pointer', fontSize: 'inherit' }}
+                style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 600, cursor: 'pointer', fontSize: 'inherit' }}
                 onClick={() => navigate(`/login/${role}`)}
               >
                 Login here

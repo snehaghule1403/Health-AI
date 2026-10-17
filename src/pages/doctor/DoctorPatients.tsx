@@ -73,7 +73,7 @@ export default function DoctorPatients() {
           </div>
           <div style={{ padding: '0.75rem' }}>
             <div style={{ position: 'relative' }}>
-              <Search size={14} aria-hidden style={{ position: 'absolute', left: '0.65rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+              <Search size={14} aria-hidden style={{ position: 'absolute', left: '0.65rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--gray-400)' }} />
               <label htmlFor="pt-search" className="sr-only">Search patients</label>
               <input id="pt-search" placeholder="Search name or email" value={search}
                 onChange={e => { setSearch(e.target.value); setPage(1); }} style={{ paddingLeft: '2rem' }} />
@@ -81,7 +81,7 @@ export default function DoctorPatients() {
           </div>
           <div>
             {pagePatients.length === 0 && (
-              <p style={{ padding: '1rem', fontSize: '0.85rem', color: '#9ca3af', textAlign: 'center' }}>
+              <p style={{ padding: '1rem', fontSize: '0.85rem', color: 'var(--gray-400)', textAlign: 'center' }}>
                 {grantedIds.size === 0 ? 'No patients have granted you access yet.' : 'No patients match your search.'}
               </p>
             )}
@@ -92,16 +92,16 @@ export default function DoctorPatients() {
                 aria-pressed={selectedPatient?.id === patient.id}
                 style={{
                   display: 'flex', width: '100%', textAlign: 'left', alignItems: 'center', gap: '0.75rem',
-                  padding: '0.85rem 1rem', border: 'none', borderTop: '1px solid #f3f4f6', cursor: 'pointer',
-                  background: selectedPatient?.id === patient.id ? '#dbeafe' : 'transparent',
+                  padding: '0.85rem 1rem', border: 'none', borderTop: '1px solid var(--gray-100)', cursor: 'pointer',
+                  background: selectedPatient?.id === patient.id ? 'var(--primary-light)' : 'transparent',
                 }}
               >
-                <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#2563eb', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.8rem', flexShrink: 0 }}>
+                <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.8rem', flexShrink: 0 }}>
                   {patient.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                 </div>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.875rem', color: '#1f2937' }}>{patient.name}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#6b7280', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--gray-800)' }}>{patient.name}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--gray-500)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {records.filter(r => r.patientId === patient.id).length} records
                   </div>
                 </div>
@@ -121,15 +121,15 @@ export default function DoctorPatients() {
         <div>
           {!selectedPatient ? (
             <div className="card" style={{ padding: '3rem', textAlign: 'center' }}>
-              <Lock size={48} style={{ opacity: 0.3, margin: '0 auto 1rem', color: '#9ca3af' }} />
-              <h3 style={{ color: '#6b7280' }}>Select a patient</h3>
-              <p style={{ color: '#9ca3af' }}>Only patients who have granted you access are listed.</p>
+              <Lock size={48} style={{ opacity: 0.3, margin: '0 auto 1rem', color: 'var(--gray-400)' }} />
+              <h3 style={{ color: 'var(--gray-500)' }}>Select a patient</h3>
+              <p style={{ color: 'var(--gray-400)' }}>Only patients who have granted you access are listed.</p>
             </div>
           ) : (
             <>
               <div className="card" style={{ padding: '1.25rem', marginBottom: '1rem' }}>
-                <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1f2937' }}>{selectedPatient.name}</h2>
-                <p style={{ fontSize: '0.85rem', color: '#6b7280' }}>
+                <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--gray-800)' }}>{selectedPatient.name}</h2>
+                <p style={{ fontSize: '0.85rem', color: 'var(--gray-500)' }}>
                   Blood Group: <strong>{selectedPatient.bloodGroup || 'N/A'}</strong>
                   {age(selectedPatient.dateOfBirth) !== null && ` · Age: ${age(selectedPatient.dateOfBirth)}`}
                   {selectedPatient.gender && ` · ${selectedPatient.gender}`}
@@ -153,7 +153,7 @@ export default function DoctorPatients() {
                       <div key={r.id} className="card" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
                         <div>
                           <div style={{ fontWeight: 600 }}>{r.name}</div>
-                          <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>{r.type} · {r.date} · {r.hospital || 'N/A'}</div>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--gray-500)' }}>{r.type} · {r.date} · {r.hospital || 'N/A'}</div>
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                           {r.aiAnalysis && <span className="badge badge-green">AI summary</span>}
@@ -170,11 +170,11 @@ export default function DoctorPatients() {
                   <div className="card">
                     <div className="card-header"><h3>Medicines</h3></div>
                     <div style={{ padding: '1rem' }}>
-                      {patientMeds.length === 0 ? <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>None recorded.</p> :
+                      {patientMeds.length === 0 ? <p style={{ color: 'var(--gray-400)', fontSize: '0.85rem' }}>None recorded.</p> :
                         patientMeds.map(m => (
-                          <div key={m.id} style={{ padding: '0.5rem 0', borderBottom: '1px solid #f3f4f6', fontSize: '0.85rem' }}>
+                          <div key={m.id} style={{ padding: '0.5rem 0', borderBottom: '1px solid var(--gray-100)', fontSize: '0.85rem' }}>
                             <strong>{m.name}</strong> {m.dosage} — {m.frequency}
-                            <div style={{ color: '#6b7280', fontSize: '0.75rem' }}>{m.startDate}{m.endDate ? ` → ${m.endDate}` : ' → ongoing'}</div>
+                            <div style={{ color: 'var(--gray-500)', fontSize: '0.75rem' }}>{m.startDate}{m.endDate ? ` → ${m.endDate}` : ' → ongoing'}</div>
                           </div>
                         ))}
                     </div>
@@ -182,11 +182,11 @@ export default function DoctorPatients() {
                   <div className="card">
                     <div className="card-header"><h3>Vaccinations</h3></div>
                     <div style={{ padding: '1rem' }}>
-                      {patientVaccines.length === 0 ? <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>None recorded.</p> :
+                      {patientVaccines.length === 0 ? <p style={{ color: 'var(--gray-400)', fontSize: '0.85rem' }}>None recorded.</p> :
                         patientVaccines.map(v => (
-                          <div key={v.id} style={{ padding: '0.5rem 0', borderBottom: '1px solid #f3f4f6', fontSize: '0.85rem' }}>
+                          <div key={v.id} style={{ padding: '0.5rem 0', borderBottom: '1px solid var(--gray-100)', fontSize: '0.85rem' }}>
                             <strong>{v.name}</strong> {v.dose} <span className={`badge ${v.status === 'completed' ? 'badge-green' : v.status === 'overdue' ? 'badge-red' : 'badge-orange'}`}>{v.status}</span>
-                            <div style={{ color: '#6b7280', fontSize: '0.75rem' }}>{v.date || '—'}{v.nextDose ? ` · next ${v.nextDose}` : ''}</div>
+                            <div style={{ color: 'var(--gray-500)', fontSize: '0.75rem' }}>{v.date || '—'}{v.nextDose ? ` · next ${v.nextDose}` : ''}</div>
                           </div>
                         ))}
                     </div>
@@ -210,7 +210,7 @@ export default function DoctorPatients() {
               </button>
             </div>
             <div className="modal-body">
-              <p style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '1rem' }}>
+              <p style={{ fontSize: '0.85rem', color: 'var(--gray-500)', marginBottom: '1rem' }}>
                 {viewRecord.type} · {viewRecord.date} · {viewRecord.hospital || 'N/A'} · {viewRecord.doctor || 'N/A'}
               </p>
               {viewRecord.notes && <p style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>📝 {viewRecord.notes}</p>}
@@ -223,7 +223,7 @@ export default function DoctorPatients() {
               {viewRecord.extractedText && (
                 <details style={{ marginBottom: '1rem' }}>
                   <summary style={{ cursor: 'pointer', fontWeight: 600, fontSize: '0.875rem' }}>Extracted text</summary>
-                  <pre style={{ background: '#1f2937', color: '#f9fafb', padding: '1rem', borderRadius: 8, fontSize: '0.78rem', whiteSpace: 'pre-wrap', maxHeight: 240, overflowY: 'auto' }}>{viewRecord.extractedText}</pre>
+                  <pre style={{ background: 'var(--gray-800)', color: 'var(--gray-50)', padding: '1rem', borderRadius: 8, fontSize: '0.78rem', whiteSpace: 'pre-wrap', maxHeight: 240, overflowY: 'auto' }}>{viewRecord.extractedText}</pre>
                 </details>
               )}
               {ai.loading ? (
@@ -235,7 +235,7 @@ export default function DoctorPatients() {
               ) : viewRecord.extractedText ? (
                 <button className="btn btn-primary btn-sm" onClick={runAI}><Brain size={14} /> Generate AI summary</button>
               ) : (
-                <p style={{ fontSize: '0.8rem', color: '#9ca3af' }}>No extracted text or AI summary available for this record.</p>
+                <p style={{ fontSize: '0.8rem', color: 'var(--gray-400)' }}>No extracted text or AI summary available for this record.</p>
               )}
             </div>
           </div>

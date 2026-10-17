@@ -21,9 +21,9 @@ export default function DoctorTrends() {
           </div>
         </div>
         <div className="card" style={{ padding: '3rem', textAlign: 'center' }}>
-          <Lock size={48} style={{ opacity: 0.3, margin: '0 auto 1rem', color: '#9ca3af' }} />
-          <h3 style={{ color: '#6b7280' }}>No authorized patients</h3>
-          <p style={{ color: '#9ca3af' }}>Health trends become visible when patients grant you access</p>
+          <Lock size={48} style={{ opacity: 0.3, margin: '0 auto 1rem', color: 'var(--gray-400)' }} />
+          <h3 style={{ color: 'var(--gray-500)' }}>No authorized patients</h3>
+          <p style={{ color: 'var(--gray-400)' }}>Health trends become visible when patients grant you access</p>
         </div>
       </div>
     );

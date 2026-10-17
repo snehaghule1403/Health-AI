@@ -73,7 +73,7 @@ export default function Sidebar() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{
             width: 36, height: 36, borderRadius: '50%',
-            background: isPatient ? '#2563eb' : '#16a34a',
+            background: isPatient ? 'var(--grad)' : '#16a34a',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: 'white', fontWeight: 700, fontSize: '0.85rem', flexShrink: 0
           }}>
@@ -123,7 +123,7 @@ export default function Sidebar() {
         <button
           className="sidebar-nav-item"
           onClick={handleLogout}
-          style={{ color: '#fca5a5', borderRadius: 6 }}
+          style={{ color: 'var(--red-border)', borderRadius: 6 }}
         >
           <LogOut size={18} />
           Logout

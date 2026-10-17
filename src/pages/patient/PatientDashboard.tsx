@@ -40,54 +40,54 @@ export default function PatientDashboard() {
 
   const statCards = [
     {
-      icon: <FileText size={20} />, iconBg: '#dbeafe', iconColor: '#2563eb',
+      icon: <FileText size={20} />, iconBg: 'var(--primary-light)', iconColor: 'var(--primary)',
       label: 'Medical Records', value: patientRecords.length, sub: 'Total uploaded',
       onClick: () => navigate('/patient/records')
     },
     {
-      icon: <Pill size={20} />, iconBg: '#ede9fe', iconColor: '#7c3aed',
+      icon: <Pill size={20} />, iconBg: 'var(--violet-light)', iconColor: 'var(--violet)',
       label: 'Active Medicines', value: patientMedicines.length, sub: 'Current prescriptions',
       onClick: () => navigate('/patient/wellness')
     },
     {
-      icon: <Droplets size={20} />, iconBg: '#cffafe', iconColor: '#0891b2',
+      icon: <Droplets size={20} />, iconBg: 'var(--cyan-light)', iconColor: 'var(--cyan)',
       label: 'Water Intake', value: `${todayWellness?.waterGlasses ?? 0}/${waterGoal}`, sub: 'glasses today',
       onClick: () => navigate('/patient/wellness')
     },
     {
-      icon: <Moon size={20} />, iconBg: '#fdf4ff', iconColor: '#a855f7',
+      icon: <Moon size={20} />, iconBg: 'var(--violet-light)', iconColor: '#a855f7',
       label: 'Sleep', value: `${todayWellness?.sleepHours ?? 0}h`, sub: 'last night',
       onClick: () => navigate('/patient/wellness')
     },
     {
-      icon: <Dumbbell size={20} />, iconBg: '#dcfce7', iconColor: '#16a34a',
+      icon: <Dumbbell size={20} />, iconBg: 'var(--green-light)', iconColor: 'var(--green)',
       label: 'Exercise', value: `${todayWellness?.exerciseMinutes ?? 0} min`, sub: 'today',
       onClick: () => navigate('/patient/wellness')
     },
     {
-      icon: <Scale size={20} />, iconBg: '#fef3c7', iconColor: '#d97706',
+      icon: <Scale size={20} />, iconBg: 'var(--yellow-light)', iconColor: 'var(--orange)',
       label: 'BMI', value: bmi, sub: bmi === '—' ? 'Add height & weight' : 'From latest weight',
       onClick: () => navigate('/patient/trends')
     },
     {
-      icon: <UserCheck size={20} />, iconBg: '#dcfce7', iconColor: '#16a34a',
+      icon: <UserCheck size={20} />, iconBg: 'var(--green-light)', iconColor: 'var(--green)',
       label: 'Doctor Access', value: activeConsents.length, sub: 'doctors authorized',
       onClick: () => navigate('/patient/sharing')
     },
     {
-      icon: <TrendingUp size={20} />, iconBg: '#ffedd5', iconColor: '#ea580c',
+      icon: <TrendingUp size={20} />, iconBg: 'var(--orange-light)', iconColor: 'var(--orange)',
       label: 'Vaccines Due', value: upcomingVaccines, sub: 'upcoming or overdue',
       onClick: () => navigate('/patient/trends')
     },
   ];
 
   const quickActions = [
-    { icon: <Plus size={16} />, label: '+ Upload Report', color: '#2563eb', bg: '#dbeafe', path: '/patient/records' },
-    { icon: <Brain size={16} />, label: '✦ Ask AI', color: '#7c3aed', bg: '#ede9fe', path: '/patient/ai-assistant' },
-    { icon: <AlertCircle size={16} />, label: '+ Add Symptom', color: '#ea580c', bg: '#ffedd5', path: '/patient/ai-assistant' },
-    { icon: <Droplets size={16} />, label: '+ Add Water', color: '#0891b2', bg: '#cffafe', path: '/patient/wellness' },
-    { icon: <Pill size={16} />, label: '+ Add Medicine', color: '#16a34a', bg: '#dcfce7', path: '/patient/wellness' },
-    { icon: <Share2 size={16} />, label: '⇄ Share with Doctor', color: '#1e3a5f', bg: '#e0e7ef', path: '/patient/sharing' },
+    { icon: <Plus size={16} />, label: '+ Upload Report', color: 'var(--primary)', bg: 'var(--primary-light)', path: '/patient/records' },
+    { icon: <Brain size={16} />, label: '✦ Ask AI', color: 'var(--violet)', bg: 'var(--violet-light)', path: '/patient/ai-assistant' },
+    { icon: <AlertCircle size={16} />, label: '+ Add Symptom', color: 'var(--orange)', bg: 'var(--orange-light)', path: '/patient/ai-assistant' },
+    { icon: <Droplets size={16} />, label: '+ Add Water', color: 'var(--cyan)', bg: 'var(--cyan-light)', path: '/patient/wellness' },
+    { icon: <Pill size={16} />, label: '+ Add Medicine', color: 'var(--green)', bg: 'var(--green-light)', path: '/patient/wellness' },
+    { icon: <Share2 size={16} />, label: '⇄ Share with Doctor', color: 'var(--navy)', bg: 'var(--gray-100)', path: '/patient/sharing' },
   ];
 
   return (
@@ -95,10 +95,10 @@ export default function PatientDashboard() {
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
 
-        <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#1f2937' }}>
+        <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--gray-800)' }}>
           {greeting}, {firstName} 👋
         </h1>
-        <p style={{ color: '#6b7280', marginTop: '0.25rem' }}>
+        <p style={{ color: 'var(--gray-500)', marginTop: '0.25rem' }}>
           Here's your health overview for today — {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
         </p>
       </div>
@@ -144,23 +144,23 @@ export default function PatientDashboard() {
                 key={record.id}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '0.75rem 1.5rem', borderBottom: '1px solid #f3f4f6',
+                  padding: '0.75rem 1.5rem', borderBottom: '1px solid var(--gray-100)',
                   cursor: 'pointer'
                 }}
                 onClick={() => navigate('/patient/records')}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                   <div style={{
-                    width: 36, height: 36, borderRadius: 8, background: '#dbeafe',
+                    width: 36, height: 36, borderRadius: 8, background: 'var(--primary-light)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center'
                   }}>
                     <FileText size={16} color="#2563eb" />
                   </div>
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: '0.875rem', color: '#1f2937' }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--gray-800)' }}>
                       {record.name}
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--gray-500)' }}>
                       {record.date} · {record.hospital}
                     </div>
                   </div>
@@ -213,28 +213,28 @@ export default function PatientDashboard() {
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={trendData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-              <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#9ca3af' }} />
+              <XAxis dataKey="date" tick={{ fontSize: 12, fill: 'var(--gray-400)' }} />
               <YAxis
                 domain={['auto', 'auto']}
-                tick={{ fontSize: 12, fill: '#9ca3af' }}
+                tick={{ fontSize: 12, fill: 'var(--gray-400)' }}
                 unit=" g/dL"
               />
               <Tooltip
                 formatter={(v: number) => [`${v} g/dL`, 'Hemoglobin']}
-                contentStyle={{ borderRadius: 8, border: '1px solid #e5e7eb', fontSize: '0.85rem' }}
+                contentStyle={{ borderRadius: 8, border: '1px solid var(--gray-200)', fontSize: '0.85rem' }}
               />
               <Line
                 type="monotone" dataKey="hemoglobin"
                 stroke="#2563eb" strokeWidth={2.5}
-                dot={{ fill: '#2563eb', r: 4 }}
+                dot={{ fill: 'var(--primary)', r: 4 }}
                 activeDot={{ r: 6 }}
               />
             </LineChart>
           </ResponsiveContainer>
           <div style={{
-            marginTop: '0.75rem', padding: '0.75rem', background: '#f0fdf4',
-            borderRadius: 8, fontSize: '0.8rem', color: '#166534',
-            border: '1px solid #86efac'
+            marginTop: '0.75rem', padding: '0.75rem', background: 'var(--green-light)',
+            borderRadius: 8, fontSize: '0.8rem', color: 'var(--green-ink)',
+            border: '1px solid var(--green-border)'
           }}>
             💡 <strong>AI Insight:</strong> Your hemoglobin has improved from 11.8 g/dL in May 2026 to 12.4 g/dL in September 2026. This is a positive trend. Continue your current supplements as prescribed.
           </div>
@@ -258,21 +258,21 @@ export default function PatientDashboard() {
               key={med.id}
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '0.75rem 1.5rem', borderBottom: '1px solid #f3f4f6'
+                padding: '0.75rem 1.5rem', borderBottom: '1px solid var(--gray-100)'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <div style={{
-                  width: 36, height: 36, borderRadius: 8, background: '#ede9fe',
+                  width: 36, height: 36, borderRadius: 8, background: 'var(--violet-light)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}>
                   <Pill size={16} color="#7c3aed" />
                 </div>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: '0.875rem', color: '#1f2937' }}>
+                  <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--gray-800)' }}>
                     {med.name}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--gray-500)' }}>
                     {med.dosage} · {med.frequency} · {med.time.join(', ')}
                   </div>
                 </div>

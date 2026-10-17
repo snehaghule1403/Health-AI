@@ -9,12 +9,12 @@ import type { HealthMeasurement } from '../types';
 
 // Reference bands are common adult guide values, shown only as visual guides.
 export const METRICS = [
-  { key: 'hemoglobin', label: 'Hemoglobin', unit: 'g/dL', color: '#2563eb' },
-  { key: 'weight', label: 'Weight', unit: 'kg', color: '#7c3aed' },
-  { key: 'bmi', label: 'BMI', unit: 'kg/m²', color: '#16a34a', normalMin: 18.5, normalMax: 24.9 },
-  { key: 'systolic', label: 'Systolic BP', unit: 'mmHg', color: '#dc2626' },
-  { key: 'diastolic', label: 'Diastolic BP', unit: 'mmHg', color: '#ea580c' },
-  { key: 'glucose', label: 'Blood Glucose', unit: 'mg/dL', color: '#d97706' },
+  { key: 'hemoglobin', label: 'Hemoglobin', unit: 'g/dL', color: 'var(--primary)' },
+  { key: 'weight', label: 'Weight', unit: 'kg', color: 'var(--violet)' },
+  { key: 'bmi', label: 'BMI', unit: 'kg/m²', color: 'var(--green)', normalMin: 18.5, normalMax: 24.9 },
+  { key: 'systolic', label: 'Systolic BP', unit: 'mmHg', color: 'var(--red)' },
+  { key: 'diastolic', label: 'Diastolic BP', unit: 'mmHg', color: 'var(--orange)' },
+  { key: 'glucose', label: 'Blood Glucose', unit: 'mg/dL', color: 'var(--orange)' },
 ] as const;
 type MetricKey = typeof METRICS[number]['key'];
 
@@ -102,31 +102,31 @@ export default function TrendsPanel({ patientId, editable }: { patientId: string
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-                <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#9ca3af' }} />
-                <YAxis domain={['auto', 'auto']} tick={{ fontSize: 12, fill: '#9ca3af' }} />
-                <Tooltip formatter={(v: number) => [`${v} ${m.unit}`, m.label]} contentStyle={{ borderRadius: 8, border: '1px solid #e5e7eb', fontSize: '0.85rem' }} />
+                <XAxis dataKey="date" tick={{ fontSize: 12, fill: 'var(--gray-400)' }} />
+                <YAxis domain={['auto', 'auto']} tick={{ fontSize: 12, fill: 'var(--gray-400)' }} />
+                <Tooltip formatter={(v: number) => [`${v} ${m.unit}`, m.label]} contentStyle={{ borderRadius: 8, border: '1px solid var(--gray-200)', fontSize: '0.85rem' }} />
                 {'normalMin' in m && <ReferenceLine y={m.normalMin} stroke="#86efac" strokeDasharray="4 4" />}
                 {'normalMax' in m && <ReferenceLine y={m.normalMax} stroke="#fca5a5" strokeDasharray="4 4" />}
                 <Line type="monotone" dataKey={metric} stroke={m.color} strokeWidth={2.5} connectNulls
-                  dot={{ fill: m.color, r: 5, strokeWidth: 2, stroke: 'white' }} activeDot={{ r: 7 }} />
+                  dot={{ fill: m.color, r: 5, strokeWidth: 2, stroke: 'var(--surface)' }} activeDot={{ r: 7 }} />
               </LineChart>
             </ResponsiveContainer>
           )}
           {metric === 'bmi' && data.length > 0 && (
-            <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.5rem' }}>
+            <p style={{ fontSize: '0.75rem', color: 'var(--gray-500)', marginTop: '0.5rem' }}>
               BMI = weight (kg) ÷ height (m)². It is a rough screening measure and does not assess overall health.
             </p>
           )}
-          <div style={{ marginTop: '1rem', padding: '0.85rem 1rem', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 8, fontSize: '0.85rem' }}>
+          <div style={{ marginTop: '1rem', padding: '0.85rem 1rem', background: 'var(--violet-light)', border: '1px solid #ddd6fe', borderRadius: 8, fontSize: '0.85rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <strong style={{ color: '#5b21b6' }}><TrendingUp size={15} style={{ display: 'inline', verticalAlign: 'middle' }} aria-hidden /> AI trend summary</strong>
+              <strong style={{ color: 'var(--violet-ink)' }}><TrendingUp size={15} style={{ display: 'inline', verticalAlign: 'middle' }} aria-hidden /> AI trend summary</strong>
               <button className="btn btn-sm btn-outline" onClick={summarize} disabled={ai.loading || all.length === 0}>
                 {ai.loading ? <><Loader size={13} className="spin" /> Summarizing…</> : 'Summarize all measurements'}
               </button>
             </div>
-            {ai.error && <p role="alert" style={{ color: '#991b1b', marginTop: '0.5rem' }}><AlertCircle size={13} /> {ai.error}</p>}
-            {ai.text && <p className="ai-text" style={{ marginTop: '0.5rem', color: '#374151' }}>{ai.text}</p>}
-            {!ai.text && !ai.error && <p style={{ color: '#6b7280', marginTop: '0.35rem' }}>Describes patterns in recorded values only — not causes or diagnoses.</p>}
+            {ai.error && <p role="alert" style={{ color: 'var(--red-ink)', marginTop: '0.5rem' }}><AlertCircle size={13} /> {ai.error}</p>}
+            {ai.text && <p className="ai-text" style={{ marginTop: '0.5rem', color: 'var(--gray-700)' }}>{ai.text}</p>}
+            {!ai.text && !ai.error && <p style={{ color: 'var(--gray-500)', marginTop: '0.35rem' }}>Describes patterns in recorded values only — not causes or diagnoses.</p>}
           </div>
         </div>
       </div>
@@ -148,18 +148,18 @@ export default function TrendsPanel({ patientId, editable }: { patientId: string
               <input id="m-date" type="date" value={entry.date} onChange={e => setEntry({ ...entry, date: e.target.value })} style={{ width: 'auto' }} />
               <button className="btn btn-primary btn-sm" onClick={submit}><Plus size={14} /> Add</button>
             </div>
-            {own.length === 0 ? <p style={{ fontSize: '0.85rem', color: '#9ca3af' }}>No measurements recorded yet.</p> : (
+            {own.length === 0 ? <p style={{ fontSize: '0.85rem', color: 'var(--gray-400)' }}>No measurements recorded yet.</p> : (
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', fontSize: '0.85rem', borderCollapse: 'collapse' }}>
-                  <thead><tr style={{ textAlign: 'left', color: '#6b7280' }}><th>Date</th><th>Measurement</th><th>Value</th><th><span className="sr-only">Actions</span></th></tr></thead>
+                  <thead><tr style={{ textAlign: 'left', color: 'var(--gray-500)' }}><th>Date</th><th>Measurement</th><th>Value</th><th><span className="sr-only">Actions</span></th></tr></thead>
                   <tbody>
                     {own.slice(0, 50).map(x => (
-                      <tr key={x.id} style={{ borderTop: '1px solid #f3f4f6' }}>
+                      <tr key={x.id} style={{ borderTop: '1px solid var(--gray-100)' }}>
                         <td style={{ padding: '0.4rem 0' }}>{x.date}</td>
                         <td>{ENTRY_KINDS.find(k => k.kind === x.kind)?.label ?? x.label ?? x.kind}</td>
                         <td>{x.value} {x.unit}</td>
                         <td style={{ textAlign: 'right' }}>
-                          <button className="btn btn-sm" style={{ background: 'none', color: '#dc2626', border: 'none' }}
+                          <button className="btn btn-sm" style={{ background: 'none', color: 'var(--red)', border: 'none' }}
                             aria-label={`Delete ${x.kind} on ${x.date}`} onClick={() => { if (confirm('Delete this measurement?')) deleteMeasurement(x.id); }}>
                             <Trash2 size={13} />
                           </button>
@@ -168,7 +168,7 @@ export default function TrendsPanel({ patientId, editable }: { patientId: string
                     ))}
                   </tbody>
                 </table>
-                {own.length > 50 && <p style={{ fontSize: '0.75rem', color: '#9ca3af' }}>Showing latest 50 of {own.length}. All values appear in the charts.</p>}
+                {own.length > 50 && <p style={{ fontSize: '0.75rem', color: 'var(--gray-400)' }}>Showing latest 50 of {own.length}. All values appear in the charts.</p>}
               </div>
             )}
           </div>

@@ -24,9 +24,9 @@ export default function DoctorHistory() {
           </div>
         </div>
         <div className="card" style={{ padding: '3rem', textAlign: 'center' }}>
-          <Lock size={48} style={{ opacity: 0.3, margin: '0 auto 1rem', color: '#9ca3af' }} />
-          <h3 style={{ color: '#6b7280' }}>No authorized patients</h3>
-          <p style={{ color: '#9ca3af' }}>Access is granted only by patients through the Doctor Sharing section</p>
+          <Lock size={48} style={{ opacity: 0.3, margin: '0 auto 1rem', color: 'var(--gray-400)' }} />
+          <h3 style={{ color: 'var(--gray-500)' }}>No authorized patients</h3>
+          <p style={{ color: 'var(--gray-400)' }}>Access is granted only by patients through the Doctor Sharing section</p>
         </div>
       </div>
     );
@@ -44,21 +44,21 @@ export default function DoctorHistory() {
       date: r.date,
       title: r.name,
       detail: `${r.type} · ${r.hospital}`,
-      color: '#2563eb', bg: '#dbeafe'
+      color: 'var(--primary)', bg: 'var(--primary-light)'
     })),
     ...patientMeds.map(m => ({
       type: 'medicine' as const,
       date: m.startDate,
       title: `Started: ${m.name}`,
       detail: `${m.dosage} · ${m.frequency}`,
-      color: '#7c3aed', bg: '#ede9fe'
+      color: 'var(--violet)', bg: 'var(--violet-light)'
     })),
     ...patientVaccines.filter(v => v.status === 'completed').map(v => ({
       type: 'vaccine' as const,
       date: v.date,
       title: `Vaccine: ${v.name}`,
       detail: v.dose,
-      color: '#16a34a', bg: '#dcfce7'
+      color: 'var(--green)', bg: 'var(--green-light)'
     })),
   ].sort((a, b) => b.date.localeCompare(a.date));
 
@@ -81,12 +81,12 @@ export default function DoctorHistory() {
       <div className="card" style={{ marginBottom: '1.5rem', padding: '1.25rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ width: 52, height: 52, borderRadius: '50%', background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#2563eb', fontSize: '1rem' }}>
+            <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: 'var(--primary)', fontSize: '1rem' }}>
               {patient.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
             </div>
             <div>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1f2937' }}>{patient.name}</h2>
-              <p style={{ fontSize: '0.82rem', color: '#6b7280' }}>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--gray-800)' }}>{patient.name}</h2>
+              <p style={{ fontSize: '0.82rem', color: 'var(--gray-500)' }}>
                 Blood Group: <strong>{patient.bloodGroup || emergency?.bloodGroup || 'N/A'}</strong>
                 {patient.dateOfBirth && ` · Age: ${new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear()}`}
                 {patient.gender && ` · ${patient.gender}`}
@@ -95,16 +95,16 @@ export default function DoctorHistory() {
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: 700, color: '#2563eb', fontSize: '1.3rem' }}>{patientRecords.length}</div>
-              <div style={{ fontSize: '0.7rem', color: '#9ca3af' }}>Reports</div>
+              <div style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '1.3rem' }}>{patientRecords.length}</div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--gray-400)' }}>Reports</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: 700, color: '#7c3aed', fontSize: '1.3rem' }}>{patientMeds.length}</div>
-              <div style={{ fontSize: '0.7rem', color: '#9ca3af' }}>Medicines</div>
+              <div style={{ fontWeight: 700, color: 'var(--violet)', fontSize: '1.3rem' }}>{patientMeds.length}</div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--gray-400)' }}>Medicines</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: 700, color: '#16a34a', fontSize: '1.3rem' }}>{patientVaccines.length}</div>
-              <div style={{ fontSize: '0.7rem', color: '#9ca3af' }}>Vaccines</div>
+              <div style={{ fontWeight: 700, color: 'var(--green)', fontSize: '1.3rem' }}>{patientVaccines.length}</div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--gray-400)' }}>Vaccines</div>
             </div>
           </div>
         </div>
@@ -113,7 +113,7 @@ export default function DoctorHistory() {
       {/* Allergies & conditions */}
       <div className="grid-2" style={{ gap: '1rem', marginBottom: '1.5rem' }}>
         <div className="card" style={{ padding: '1.25rem' }}>
-          <h3 style={{ fontWeight: 600, color: '#dc2626', marginBottom: '0.75rem', fontSize: '0.9rem' }}>⚠️ Known Allergies</h3>
+          <h3 style={{ fontWeight: 600, color: 'var(--red)', marginBottom: '0.75rem', fontSize: '0.9rem' }}>⚠️ Known Allergies</h3>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
             {(emergency?.allergies.length ? emergency.allergies : ['None recorded']).map((a, i) => (
               <span key={i} className="badge badge-red">{a}</span>
@@ -121,7 +121,7 @@ export default function DoctorHistory() {
           </div>
         </div>
         <div className="card" style={{ padding: '1.25rem' }}>
-          <h3 style={{ fontWeight: 600, color: '#ea580c', marginBottom: '0.75rem', fontSize: '0.9rem' }}>📋 Medical Conditions</h3>
+          <h3 style={{ fontWeight: 600, color: 'var(--orange)', marginBottom: '0.75rem', fontSize: '0.9rem' }}>📋 Medical Conditions</h3>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
             {(emergency?.conditions.length ? emergency.conditions : ['None recorded']).map((c, i) => (
               <span key={i} className="badge badge-orange">{c}</span>
@@ -137,7 +137,7 @@ export default function DoctorHistory() {
           <span className="badge badge-gray">{timeline.length} events</span>
         </div>
         <div style={{ padding: '1.5rem' }}>
-          <div style={{ position: 'relative', paddingLeft: '2rem', borderLeft: '2px solid #e5e7eb' }}>
+          <div style={{ position: 'relative', paddingLeft: '2rem', borderLeft: '2px solid var(--gray-200)' }}>
             {timeline.map((item, i) => (
               <div key={i} style={{ position: 'relative', paddingBottom: '1.5rem' }}>
                 <div style={{
@@ -147,9 +147,9 @@ export default function DoctorHistory() {
                 }} />
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.1rem' }}>{item.date}</div>
-                    <div style={{ fontWeight: 600, color: '#1f2937', fontSize: '0.875rem' }}>{item.title}</div>
-                    <div style={{ fontSize: '0.78rem', color: '#6b7280' }}>{item.detail}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--gray-400)', marginBottom: '0.1rem' }}>{item.date}</div>
+                    <div style={{ fontWeight: 600, color: 'var(--gray-800)', fontSize: '0.875rem' }}>{item.title}</div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--gray-500)' }}>{item.detail}</div>
                   </div>
                   <span style={{ background: item.bg, color: item.color, padding: '0.2rem 0.6rem', borderRadius: 20, fontSize: '0.7rem', fontWeight: 600, flexShrink: 0 }}>
                     {item.type}

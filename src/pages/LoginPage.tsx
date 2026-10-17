@@ -42,7 +42,7 @@ export default function LoginPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
+      background: 'linear-gradient(135deg, var(--primary-light) 0%, var(--primary-light) 100%)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '1rem'
     }}>
@@ -50,7 +50,7 @@ export default function LoginPage() {
         {/* Back button */}
         <button
           className="btn btn-outline"
-          style={{ background: 'white', marginBottom: '1.25rem' }}
+          style={{ background: 'var(--surface)', marginBottom: '1.25rem' }}
           onClick={() => navigate('/')}
         >
           <ArrowLeft size={16} /> Back to Home
@@ -61,7 +61,7 @@ export default function LoginPage() {
             {/* Logo */}
             <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
               <div style={{
-                width: 56, height: 56, background: isPatient ? '#2563eb' : '#1e3a5f',
+                width: 56, height: 56, background: isPatient ? 'var(--grad)' : 'var(--navy)',
                 borderRadius: 16, display: 'flex', alignItems: 'center',
                 justifyContent: 'center', margin: '0 auto 0.75rem'
               }}>
@@ -70,10 +70,10 @@ export default function LoginPage() {
                   : <Stethoscope size={28} color="white" />
                 }
               </div>
-              <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#1f2937' }}>
+              <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gray-800)' }}>
                 {isPatient ? 'Patient Login' : 'Doctor Login'}
               </h1>
-              <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+              <p style={{ color: 'var(--gray-500)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
                 {isPatient ? 'Access your personal health records' : 'Access authorized patient records'}
               </p>
             </div>
@@ -119,7 +119,7 @@ export default function LoginPage() {
                 onClick={() => setShowPassword(!showPassword)}
                 style={{
                   position: 'absolute', right: '0.75rem', top: '2.1rem',
-                  background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280'
+                  background: 'none', border: 'none', cursor: 'pointer', color: 'var(--gray-500)'
                 }}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -128,7 +128,7 @@ export default function LoginPage() {
 
             <div style={{ textAlign: 'right', marginTop: '-0.5rem', marginBottom: '0.5rem' }}>
               <button type="button" onClick={handleForgot}
-                style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '0.8rem' }}>
+                style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '0.8rem' }}>
                 Forgot password?
               </button>
             </div>
@@ -140,7 +140,7 @@ export default function LoginPage() {
               style={{
                 width: '100%', justifyContent: 'center', padding: '0.75rem',
                 fontSize: '1rem', marginTop: '0.5rem',
-                background: isPatient ? undefined : '#1e3a5f',
+                background: isPatient ? undefined : 'var(--navy)',
                 color: isPatient ? undefined : 'white'
               }}
             >
@@ -154,11 +154,11 @@ export default function LoginPage() {
               )}
             </button>
 
-            <div style={{ textAlign: 'center', marginTop: '1.25rem', fontSize: '0.875rem', color: '#6b7280' }}>
+            <div style={{ textAlign: 'center', marginTop: '1.25rem', fontSize: '0.875rem', color: 'var(--gray-500)' }}>
               Don't have an account?{' '}
               <button
                 type="button"
-                style={{ background: 'none', border: 'none', color: '#2563eb', fontWeight: 600, cursor: 'pointer', fontSize: 'inherit' }}
+                style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 600, cursor: 'pointer', fontSize: 'inherit' }}
                 onClick={() => navigate(`/register/${role}`)}
               >
                 Register here
@@ -169,7 +169,7 @@ export default function LoginPage() {
               <div style={{ textAlign: 'center', marginTop: '0.5rem', fontSize: '0.875rem' }}>
                 <button
                   type="button"
-                  style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: 'inherit' }}
+                  style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: 'inherit' }}
                   onClick={() => navigate('/login/patient')}
                 >
                   Switch to Patient Login →
@@ -180,7 +180,7 @@ export default function LoginPage() {
               <div style={{ textAlign: 'center', marginTop: '0.5rem', fontSize: '0.875rem' }}>
                 <button
                   type="button"
-                  style={{ background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer', fontSize: 'inherit' }}
+                  style={{ background: 'none', border: 'none', color: 'var(--navy)', cursor: 'pointer', fontSize: 'inherit' }}
                   onClick={() => navigate('/login/doctor')}
                 >
                   Are you a Doctor? →
@@ -190,7 +190,7 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p style={{ textAlign: 'center', marginTop: '1.25rem', fontSize: '0.75rem', color: '#9ca3af' }}>
+        <p style={{ textAlign: 'center', marginTop: '1.25rem', fontSize: '0.75rem', color: 'var(--gray-400)' }}>
           Educational project — not a substitute for professional medical care
         </p>
       </div>

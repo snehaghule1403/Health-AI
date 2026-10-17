@@ -35,10 +35,10 @@ export default function WellnessTracker() {
   const height = currentUser?.height;
   const bmiNum = height && latestWeight ? latestWeight / ((height / 100) ** 2) : null;
   const bmiInfo = bmiNum == null ? null
-    : bmiNum < 18.5 ? { label: 'Below 18.5', color: '#ea580c' }
-    : bmiNum < 25 ? { label: '18.5–24.9', color: '#16a34a' }
-    : bmiNum < 30 ? { label: '25–29.9', color: '#ea580c' }
-    : { label: '30 or above', color: '#dc2626' };
+    : bmiNum < 18.5 ? { label: 'Below 18.5', color: 'var(--orange)' }
+    : bmiNum < 25 ? { label: '18.5–24.9', color: 'var(--green)' }
+    : bmiNum < 30 ? { label: '25–29.9', color: 'var(--orange)' }
+    : { label: '30 or above', color: 'var(--red)' };
 
   // ─── Daily log form ────────────────────────────────────────────────────────
   const [logDate, setLogDate] = useState(today);
@@ -173,15 +173,15 @@ export default function WellnessTracker() {
             <div className="card" style={{ padding: '1.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
                 <Droplets size={20} color="#0891b2" aria-hidden />
-                <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#1f2937' }}>Water Today</h3>
+                <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--gray-800)' }}>Water Today</h3>
               </div>
-              <div style={{ fontSize: '2rem', fontWeight: 700, color: '#0891b2', marginBottom: '0.25rem' }}>
-                {todayEntry?.waterGlasses ?? 0}<span style={{ fontSize: '1rem', color: '#6b7280' }}>/{waterGoal}</span>
+              <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--cyan)', marginBottom: '0.25rem' }}>
+                {todayEntry?.waterGlasses ?? 0}<span style={{ fontSize: '1rem', color: 'var(--gray-500)' }}>/{waterGoal}</span>
               </div>
               <div className="progress-bar" style={{ marginBottom: '0.75rem' }} role="progressbar" aria-valuenow={todayEntry?.waterGlasses ?? 0} aria-valuemax={waterGoal}>
-                <div className="progress-fill" style={{ width: `${Math.min(((todayEntry?.waterGlasses ?? 0) / waterGoal) * 100, 100)}%`, background: '#0891b2' }} />
+                <div className="progress-fill" style={{ width: `${Math.min(((todayEntry?.waterGlasses ?? 0) / waterGoal) * 100, 100)}%`, background: 'var(--cyan)' }} />
               </div>
-              <button className="btn btn-sm" style={{ background: '#cffafe', color: '#0891b2', border: 'none', width: '100%', justifyContent: 'center' }} onClick={addGlass}>
+              <button className="btn btn-sm" style={{ background: 'var(--cyan-light)', color: 'var(--cyan)', border: 'none', width: '100%', justifyContent: 'center' }} onClick={addGlass}>
                 <Plus size={14} /> Add Glass
               </button>
             </div>
@@ -189,32 +189,32 @@ export default function WellnessTracker() {
             <div className="card" style={{ padding: '1.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
                 <Moon size={20} color="#7c3aed" aria-hidden />
-                <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#1f2937' }}>Sleep</h3>
+                <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--gray-800)' }}>Sleep</h3>
               </div>
-              <div style={{ fontSize: '2rem', fontWeight: 700, color: '#7c3aed' }}>
-                {todayEntry?.sleepHours ?? 0}<span style={{ fontSize: '1rem', color: '#6b7280' }}> hrs</span>
+              <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--violet)' }}>
+                {todayEntry?.sleepHours ?? 0}<span style={{ fontSize: '1rem', color: 'var(--gray-500)' }}> hrs</span>
               </div>
-              <p style={{ fontSize: '0.75rem', color: '#6b7280' }}>Last 7 days: {weekly('sleepHours').toFixed(1)} h total</p>
+              <p style={{ fontSize: '0.75rem', color: 'var(--gray-500)' }}>Last 7 days: {weekly('sleepHours').toFixed(1)} h total</p>
             </div>
 
             <div className="card" style={{ padding: '1.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
                 <Dumbbell size={20} color="#16a34a" aria-hidden />
-                <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#1f2937' }}>Exercise</h3>
+                <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--gray-800)' }}>Exercise</h3>
               </div>
-              <div style={{ fontSize: '2rem', fontWeight: 700, color: '#16a34a' }}>
-                {todayEntry?.exerciseMinutes ?? 0}<span style={{ fontSize: '1rem', color: '#6b7280' }}> min</span>
+              <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--green)' }}>
+                {todayEntry?.exerciseMinutes ?? 0}<span style={{ fontSize: '1rem', color: 'var(--gray-500)' }}> min</span>
               </div>
-              <p style={{ fontSize: '0.75rem', color: '#6b7280' }}>Last 7 days: {weekly('exerciseMinutes')} min</p>
+              <p style={{ fontSize: '0.75rem', color: 'var(--gray-500)' }}>Last 7 days: {weekly('exerciseMinutes')} min</p>
             </div>
 
             <div className="card" style={{ padding: '1.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
                 <Scale size={20} color="#d97706" aria-hidden />
-                <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#1f2937' }}>Weight & BMI</h3>
+                <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--gray-800)' }}>Weight & BMI</h3>
               </div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#d97706' }}>{latestWeight ? `${latestWeight} kg` : '—'}</div>
-              <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--orange)' }}>{latestWeight ? `${latestWeight} kg` : '—'}</div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--gray-500)' }}>
                 BMI: {bmiNum != null && bmiInfo ? <><strong style={{ color: bmiInfo.color }}>{bmiNum.toFixed(1)}</strong> <span style={{ fontSize: '0.75rem' }}>({bmiInfo.label})</span></> : 'needs height & weight'}
               </div>
               {!height ? (
@@ -223,7 +223,7 @@ export default function WellnessTracker() {
                   <input id="h-in" type="number" placeholder="Height cm" value={heightInput} onChange={e => setHeightInput(e.target.value)} style={{ fontSize: '0.8rem', padding: '0.35rem 0.6rem' }} />
                   <button className="btn btn-outline btn-sm" onClick={() => { const h = Number(heightInput); if (h >= 30 && h <= 272) updateProfile({ height: h }); }}>Save</button>
                 </div>
-              ) : <p style={{ fontSize: '0.7rem', color: '#9ca3af' }}>Height: {height} cm</p>}
+              ) : <p style={{ fontSize: '0.7rem', color: 'var(--gray-400)' }}>Height: {height} cm</p>}
             </div>
           </div>
 
@@ -250,7 +250,7 @@ export default function WellnessTracker() {
               <input id="l-meals" value={log.meals} maxLength={1000} placeholder="e.g. Breakfast: oats; Lunch: dal rice" onChange={e => setLog({ ...log, meals: e.target.value })} /></div>
             <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
               <button className="btn btn-primary" onClick={saveLog} disabled={savingLog}><Save size={15} /> {savingLog ? 'Saving…' : 'Save entry'}</button>
-              <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--gray-500)' }}>
                 Daily water goal:
                 <input aria-label="Daily water goal" type="number" min={1} max={40} value={goalInput || waterGoal}
                   onChange={e => setGoalInput(e.target.value)} onBlur={() => { const g = Number(goalInput); if (g >= 1 && g <= 40 && g !== waterGoal) updateProfile({ waterGoal: g }); setGoalInput(''); }}
@@ -263,7 +263,7 @@ export default function WellnessTracker() {
             <div className="card">
               <div className="card-header"><h3>Water — Last 7 Entries</h3></div>
               <div style={{ padding: '1rem' }}>
-                {last7.length === 0 ? <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>No entries yet.</p> : (
+                {last7.length === 0 ? <p style={{ color: 'var(--gray-400)', fontSize: '0.85rem' }}>No entries yet.</p> : (
                   <ResponsiveContainer width="100%" height={180}>
                     <BarChart data={last7}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
@@ -279,7 +279,7 @@ export default function WellnessTracker() {
             <div className="card">
               <div className="card-header"><h3>Sleep — Last 7 Entries</h3></div>
               <div style={{ padding: '1rem' }}>
-                {last7.length === 0 ? <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>No entries yet.</p> : (
+                {last7.length === 0 ? <p style={{ color: 'var(--gray-400)', fontSize: '0.85rem' }}>No entries yet.</p> : (
                   <ResponsiveContainer width="100%" height={180}>
                     <LineChart data={last7}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
@@ -297,12 +297,12 @@ export default function WellnessTracker() {
           <div className="card">
             <div className="card-header"><h3>History</h3><span className="badge badge-gray">{patientWellness.length} days</span></div>
             <div style={{ padding: '1rem', overflowX: 'auto' }}>
-              {patientWellness.length === 0 ? <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Log your first day above.</p> : (
+              {patientWellness.length === 0 ? <p style={{ color: 'var(--gray-400)', fontSize: '0.85rem' }}>Log your first day above.</p> : (
                 <table style={{ width: '100%', fontSize: '0.85rem', borderCollapse: 'collapse', minWidth: 520 }}>
-                  <thead><tr style={{ textAlign: 'left', color: '#6b7280' }}><th>Date</th><th>Water</th><th>Sleep</th><th>Exercise</th><th>Weight</th><th><span className="sr-only">Actions</span></th></tr></thead>
+                  <thead><tr style={{ textAlign: 'left', color: 'var(--gray-500)' }}><th>Date</th><th>Water</th><th>Sleep</th><th>Exercise</th><th>Weight</th><th><span className="sr-only">Actions</span></th></tr></thead>
                   <tbody>
                     {histItems.map(w => (
-                      <tr key={w.id} style={{ borderTop: '1px solid #f3f4f6' }}>
+                      <tr key={w.id} style={{ borderTop: '1px solid var(--gray-100)' }}>
                         <td style={{ padding: '0.45rem 0' }}>{w.date}</td>
                         <td>{w.waterGlasses}</td>
                         <td>{w.sleepHours} h</td>
@@ -310,7 +310,7 @@ export default function WellnessTracker() {
                         <td>{w.weight ? `${w.weight} kg` : '—'}</td>
                         <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                           <button className="btn btn-sm btn-outline" aria-label={`Edit ${w.date}`} onClick={() => { setLogDate(w.date); window.scrollTo({ top: 0, behavior: 'smooth' }); }}><Pencil size={12} /></button>{' '}
-                          <button className="btn btn-sm" style={{ background: '#fee2e2', color: '#dc2626', border: 'none' }} aria-label={`Delete ${w.date}`}
+                          <button className="btn btn-sm" style={{ background: 'var(--red-light)', color: 'var(--red)', border: 'none' }} aria-label={`Delete ${w.date}`}
                             onClick={() => { if (confirm(`Delete the entry for ${w.date}?`)) deleteWellnessEntry(w.id); }}><Trash2 size={12} /></button>
                         </td>
                       </tr>
@@ -327,7 +327,7 @@ export default function WellnessTracker() {
               )}
             </div>
           </div>
-          <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.75rem' }}>
+          <p style={{ fontSize: '0.75rem', color: 'var(--gray-400)', marginTop: '0.75rem' }}>
             <Info size={12} aria-hidden /> BMI is a rough screening measure based only on height and weight; it does not assess overall health.
           </p>
         </>
@@ -401,21 +401,21 @@ export default function WellnessTracker() {
           ) : (
             [['Active', activeMeds], ['Completed', completedMeds]].map(([label, list]) => (list as Medicine[]).length > 0 && (
               <div key={label as string} style={{ marginBottom: '1rem' }}>
-                <h3 style={{ fontWeight: 600, color: '#6b7280', marginBottom: '0.5rem', fontSize: '0.8rem', textTransform: 'uppercase' }}>{label as string} ({(list as Medicine[]).length})</h3>
+                <h3 style={{ fontWeight: 600, color: 'var(--gray-500)', marginBottom: '0.5rem', fontSize: '0.8rem', textTransform: 'uppercase' }}>{label as string} ({(list as Medicine[]).length})</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {(list as Medicine[]).map(med => (
                     <div key={med.id} className="card" style={{ padding: '1rem 1.25rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.75rem', flexWrap: 'wrap' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                          <div style={{ width: 40, height: 40, borderRadius: 10, background: '#ede9fe', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--violet-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                             <Pill size={20} color="#7c3aed" />
                           </div>
                           <div>
-                            <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#1f2937' }}>{med.name}</h3>
-                            <p style={{ fontSize: '0.78rem', color: '#6b7280' }}>
+                            <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--gray-800)' }}>{med.name}</h3>
+                            <p style={{ fontSize: '0.78rem', color: 'var(--gray-500)' }}>
                               {[med.dosage, med.frequency, med.time.join(', ')].filter(Boolean).join(' · ')}
                             </p>
-                            <p style={{ fontSize: '0.72rem', color: '#9ca3af' }}>{med.startDate} → {med.endDate ?? 'ongoing'}{med.instructions ? ` · ${med.instructions}` : ''}</p>
+                            <p style={{ fontSize: '0.72rem', color: 'var(--gray-400)' }}>{med.startDate} → {med.endDate ?? 'ongoing'}{med.instructions ? ` · ${med.instructions}` : ''}</p>
                           </div>
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
@@ -425,7 +425,7 @@ export default function WellnessTracker() {
                             </button>
                           )}
                           <button className="btn btn-sm btn-outline" aria-label={`Edit ${med.name}`} onClick={() => editMed(med)}><Pencil size={13} /></button>
-                          <button aria-label={`Delete ${med.name}`} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: '0.25rem' }}
+                          <button aria-label={`Delete ${med.name}`} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--gray-400)', padding: '0.25rem' }}
                             onClick={() => { if (confirm(`Delete ${med.name}?`)) deleteMedicine(med.id); }}>
                             <Trash2 size={15} />
                           </button>
@@ -495,9 +495,9 @@ export default function WellnessTracker() {
           )}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {[
-              { label: 'Overdue', status: 'overdue', color: '#dc2626' },
-              { label: 'Upcoming', status: 'upcoming', color: '#2563eb' },
-              { label: 'Completed', status: 'completed', color: '#16a34a' },
+              { label: 'Overdue', status: 'overdue', color: 'var(--red)' },
+              { label: 'Upcoming', status: 'upcoming', color: 'var(--primary)' },
+              { label: 'Completed', status: 'completed', color: 'var(--green)' },
             ].map(group => {
               const groupVax = patientVaccines.filter(v => v.status === group.status);
               if (groupVax.length === 0) return null;
@@ -512,15 +512,15 @@ export default function WellnessTracker() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                           <Syringe size={20} color={group.color} aria-hidden />
                           <div>
-                            <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#1f2937' }}>{vax.name}</h4>
-                            <p style={{ fontSize: '0.78rem', color: '#6b7280' }}>
+                            <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--gray-800)' }}>{vax.name}</h4>
+                            <p style={{ fontSize: '0.78rem', color: 'var(--gray-500)' }}>
                               {[vax.dose, vax.date && `Given ${vax.date}`, vax.hospital, vax.nextDose && `Next: ${vax.nextDose}`].filter(Boolean).join(' · ')}
                             </p>
                           </div>
                         </div>
                         <div style={{ display: 'flex', gap: '0.4rem' }}>
                           <button className="btn btn-sm btn-outline" aria-label={`Edit ${vax.name}`} onClick={() => editVax(vax)}><Pencil size={13} /></button>
-                          <button className="btn btn-sm" style={{ background: '#fee2e2', color: '#dc2626', border: 'none' }} aria-label={`Delete ${vax.name}`}
+                          <button className="btn btn-sm" style={{ background: 'var(--red-light)', color: 'var(--red)', border: 'none' }} aria-label={`Delete ${vax.name}`}
                             onClick={() => { if (confirm(`Delete ${vax.name}?`)) deleteVaccine(vax.id); }}><Trash2 size={13} /></button>
                         </div>
                       </div>

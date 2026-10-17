@@ -27,9 +27,9 @@ export default function EmergencyAccessPage() {
   }, [token]);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#fef2f2', padding: '1rem', display: 'flex', justifyContent: 'center' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', padding: '1rem', display: 'flex', justifyContent: 'center' }}>
       <main className="card" style={{ width: '100%', maxWidth: 520, padding: '1.5rem', alignSelf: 'flex-start' }}>
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', color: '#b91c1c', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', color: 'var(--red)', marginBottom: '1rem' }}>
           <AlertCircle size={22} aria-hidden /> <h1 style={{ fontSize: '1.25rem' }}>Emergency Medical Information</h1>
         </div>
         {state === 'loading' && <p role="status">Loading…</p>}
@@ -38,18 +38,18 @@ export default function EmergencyAccessPage() {
         {state === 'ok' && data && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <p style={{ fontSize: '1.15rem', fontWeight: 700 }}>{data.name}</p>
-            <section><h2 style={{ fontSize: '0.9rem', color: '#6b7280' }}><Heart size={14} aria-hidden /> Blood group</h2>
-              <p style={{ fontSize: '1.5rem', fontWeight: 700, color: '#b91c1c' }}>{data.blood_group || 'Not provided'}</p></section>
-            <section><h2 style={{ fontSize: '0.9rem', color: '#6b7280' }}>Allergies</h2>
+            <section><h2 style={{ fontSize: '0.9rem', color: 'var(--gray-500)' }}><Heart size={14} aria-hidden /> Blood group</h2>
+              <p style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--red)' }}>{data.blood_group || 'Not provided'}</p></section>
+            <section><h2 style={{ fontSize: '0.9rem', color: 'var(--gray-500)' }}>Allergies</h2>
               <p>{data.allergies.length ? data.allergies.join(', ') : 'None recorded'}</p></section>
-            <section><h2 style={{ fontSize: '0.9rem', color: '#6b7280' }}>Conditions</h2>
+            <section><h2 style={{ fontSize: '0.9rem', color: 'var(--gray-500)' }}>Conditions</h2>
               <p>{data.conditions.length ? data.conditions.join(', ') : 'None recorded'}</p></section>
-            <section><h2 style={{ fontSize: '0.9rem', color: '#6b7280' }}><Pill size={14} aria-hidden /> Current medicines</h2>
+            <section><h2 style={{ fontSize: '0.9rem', color: 'var(--gray-500)' }}><Pill size={14} aria-hidden /> Current medicines</h2>
               <p>{data.active_medicines.length ? data.active_medicines.join(', ') : 'None recorded'}</p></section>
-            <section><h2 style={{ fontSize: '0.9rem', color: '#6b7280' }}><Phone size={14} aria-hidden /> Emergency contact</h2>
+            <section><h2 style={{ fontSize: '0.9rem', color: 'var(--gray-500)' }}><Phone size={14} aria-hidden /> Emergency contact</h2>
               <p>{data.contact_name || 'Not provided'}{data.contact_relation ? ` (${data.contact_relation})` : ''}</p>
               {data.contact_phone && <a className="btn btn-primary" href={`tel:${data.contact_phone.replace(/[^\d+]/g, '')}`}>Call {data.contact_phone}</a>}</section>
-            <p style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+            <p style={{ fontSize: '0.75rem', color: 'var(--gray-500)' }}>
               Provided by the patient via HealthAI; last updated {new Date(data.updated_at).toLocaleDateString()}. Information may be incomplete — verify clinically.
             </p>
           </div>

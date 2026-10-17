@@ -30,9 +30,9 @@ export default function DoctorConsent() {
       </div>
 
       {myConsents.length === 0 ? (
-        <div className="card" style={{ padding: '3rem', textAlign: 'center', color: '#9ca3af' }}>
+        <div className="card" style={{ padding: '3rem', textAlign: 'center', color: 'var(--gray-400)' }}>
           <ShieldCheck size={48} style={{ opacity: 0.3, margin: '0 auto 1rem' }} />
-          <h3 style={{ color: '#6b7280' }}>No consent records</h3>
+          <h3 style={{ color: 'var(--gray-500)' }}>No consent records</h3>
           <p>Patients will appear here after they grant you access</p>
         </div>
       ) : (
@@ -41,10 +41,10 @@ export default function DoctorConsent() {
             <div key={consent.id} className="card" style={{ padding: '1.5rem', borderLeft: `4px solid ${consent.status === 'granted' ? '#16a34a' : consent.status === 'revoked' ? '#dc2626' : '#d97706'}` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                 <div>
-                  <h3 style={{ fontWeight: 600, color: '#1f2937', marginBottom: '0.25rem' }}>
+                  <h3 style={{ fontWeight: 600, color: 'var(--gray-800)', marginBottom: '0.25rem' }}>
                     {getPatientName(consent.patientId)}
                   </h3>
-                  <p style={{ fontSize: '0.8rem', color: '#6b7280' }}>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--gray-500)' }}>
                     {consent.accessType} · {consent.hospital}
                   </p>
                 </div>
@@ -66,8 +66,8 @@ export default function DoctorConsent() {
               )}
 
               {/* Access history */}
-              <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: '0.75rem' }}>
-                <h4 style={{ fontSize: '0.78rem', fontWeight: 600, color: '#9ca3af', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <div style={{ borderTop: '1px solid var(--gray-100)', paddingTop: '0.75rem' }}>
+                <h4 style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--gray-400)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   <History size={12} /> ACCESS LOG
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
@@ -77,8 +77,8 @@ export default function DoctorConsent() {
                         width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
                         background: h.action.includes('Granted') ? '#16a34a' : h.action.includes('Revoked') ? '#dc2626' : '#6b7280'
                       }} />
-                      <span style={{ color: '#374151', minWidth: 140 }}>{h.action}</span>
-                      <span style={{ color: '#9ca3af' }}>
+                      <span style={{ color: 'var(--gray-700)', minWidth: 140 }}>{h.action}</span>
+                      <span style={{ color: 'var(--gray-400)' }}>
                         {new Date(h.timestamp).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
@@ -90,14 +90,14 @@ export default function DoctorConsent() {
         </div>
       )}
 
-      <div className="card" style={{ marginTop: '1.5rem', padding: '1.25rem', background: '#f9fafb' }}>
+      <div className="card" style={{ marginTop: '1.5rem', padding: '1.25rem', background: 'var(--gray-50)' }}>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
           <AlertCircle size={18} color="#6b7280" style={{ flexShrink: 0, marginTop: 2 }} />
           <div>
-            <h4 style={{ fontWeight: 600, color: '#374151', marginBottom: '0.3rem', fontSize: '0.9rem' }}>
+            <h4 style={{ fontWeight: 600, color: 'var(--gray-700)', marginBottom: '0.3rem', fontSize: '0.9rem' }}>
               How Patient Consent Works
             </h4>
-            <ul style={{ fontSize: '0.8rem', color: '#6b7280', lineHeight: 1.7, paddingLeft: '1rem' }}>
+            <ul style={{ fontSize: '0.8rem', color: 'var(--gray-500)', lineHeight: 1.7, paddingLeft: '1rem' }}>
               <li>Patients control access to their own health data at all times</li>
               <li>When a patient revokes access, you immediately lose the ability to view their records</li>
               <li>Access history is maintained for transparency and audit purposes</li>

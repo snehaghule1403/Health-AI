@@ -137,9 +137,9 @@ export default function AIAssistant() {
             {/* Messages */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {chatMessages.length === 0 && (
-                <div style={{ textAlign: 'center', padding: '2rem 1rem', color: '#9ca3af' }}>
+                <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--gray-400)' }}>
                   <Brain size={48} style={{ opacity: 0.3, margin: '0 auto 1rem' }} />
-                  <p style={{ fontWeight: 500, color: '#6b7280' }}>Start a conversation</p>
+                  <p style={{ fontWeight: 500, color: 'var(--gray-500)' }}>Start a conversation</p>
                   <p style={{ fontSize: '0.85rem' }}>Ask about your health, reports, or medical terms</p>
                 </div>
               )}
@@ -147,7 +147,7 @@ export default function AIAssistant() {
                 <div key={msg.id} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
                   {msg.role === 'assistant' && (
                     <div style={{
-                      width: 30, height: 30, borderRadius: '50%', background: '#dbeafe',
+                      width: 30, height: 30, borderRadius: '50%', background: 'var(--primary-light)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       flexShrink: 0, marginRight: '0.5rem', alignSelf: 'flex-end'
                     }}>
@@ -164,14 +164,14 @@ export default function AIAssistant() {
               ))}
               {loading && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Brain size={15} color="#2563eb" />
                   </div>
-                  <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 12, padding: '0.75rem 1rem' }}>
+                  <div style={{ background: 'var(--surface)', border: '1px solid var(--gray-200)', borderRadius: 12, padding: '0.75rem 1rem' }}>
                     <span style={{ display: 'flex', gap: 4 }}>
                       {[0, 1, 2].map(i => (
                         <span key={i} style={{
-                          width: 7, height: 7, borderRadius: '50%', background: '#9ca3af',
+                          width: 7, height: 7, borderRadius: '50%', background: 'var(--gray-400)',
                           animation: `bounce 1s ${i * 0.2}s infinite`
                         }} />
                       ))}
@@ -188,7 +188,7 @@ export default function AIAssistant() {
             </div>
 
             {/* Input */}
-            <div style={{ padding: '1rem', borderTop: '1px solid #f3f4f6' }}>
+            <div style={{ padding: '1rem', borderTop: '1px solid var(--gray-100)' }}>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <input
                   value={input}
@@ -209,7 +209,7 @@ export default function AIAssistant() {
               {chatMessages.length > 0 && (
                 <button
                   onClick={clearChat}
-                  style={{ background: 'none', border: 'none', color: '#9ca3af', fontSize: '0.75rem', cursor: 'pointer', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                  style={{ background: 'none', border: 'none', color: 'var(--gray-400)', fontSize: '0.75rem', cursor: 'pointer', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
                 >
                   <Trash2 size={12} /> Clear chat
                 </button>
@@ -220,7 +220,7 @@ export default function AIAssistant() {
           {/* Suggestions */}
           <div>
             <div className="card" style={{ padding: '1.25rem' }}>
-              <h4 style={{ fontWeight: 600, color: '#1f2937', marginBottom: '0.75rem', fontSize: '0.9rem' }}>
+              <h4 style={{ fontWeight: 600, color: 'var(--gray-800)', marginBottom: '0.75rem', fontSize: '0.9rem' }}>
                 💡 Suggested Questions
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -229,20 +229,20 @@ export default function AIAssistant() {
                     key={i}
                     onClick={() => sendMessage(q)}
                     style={{
-                      background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 8,
+                      background: 'var(--gray-50)', border: '1px solid var(--gray-200)', borderRadius: 8,
                       padding: '0.6rem 0.85rem', textAlign: 'left', cursor: 'pointer',
-                      fontSize: '0.8rem', color: '#374151', lineHeight: 1.4,
+                      fontSize: '0.8rem', color: 'var(--gray-700)', lineHeight: 1.4,
                       transition: 'all 0.15s'
                     }}
                     onMouseEnter={e => {
-                      (e.target as HTMLButtonElement).style.background = '#dbeafe';
-                      (e.target as HTMLButtonElement).style.borderColor = '#93c5fd';
-                      (e.target as HTMLButtonElement).style.color = '#1e40af';
+                      (e.target as HTMLButtonElement).style.background = 'var(--primary-light)';
+                      (e.target as HTMLButtonElement).style.borderColor = 'var(--primary)';
+                      (e.target as HTMLButtonElement).style.color = 'var(--primary-ink)';
                     }}
                     onMouseLeave={e => {
-                      (e.target as HTMLButtonElement).style.background = '#f9fafb';
-                      (e.target as HTMLButtonElement).style.borderColor = '#e5e7eb';
-                      (e.target as HTMLButtonElement).style.color = '#374151';
+                      (e.target as HTMLButtonElement).style.background = 'var(--gray-50)';
+                      (e.target as HTMLButtonElement).style.borderColor = 'var(--gray-200)';
+                      (e.target as HTMLButtonElement).style.color = 'var(--gray-700)';
                     }}
                   >
                     {q}
@@ -252,10 +252,10 @@ export default function AIAssistant() {
             </div>
 
             <div className="card" style={{ padding: '1.25rem', marginTop: '1rem' }}>
-              <h4 style={{ fontWeight: 600, color: '#1f2937', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
+              <h4 style={{ fontWeight: 600, color: 'var(--gray-800)', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
                 ℹ️ About This AI
               </h4>
-              <p style={{ fontSize: '0.78rem', color: '#6b7280', lineHeight: 1.5 }}>
+              <p style={{ fontSize: '0.78rem', color: 'var(--gray-500)', lineHeight: 1.5 }}>
                 Answers are generated by a real AI model on our server. Your chat history is saved privately to your account and is never shared with doctors. Not a substitute for professional medical advice.
               </p>
             </div>
@@ -344,15 +344,15 @@ export default function AIAssistant() {
                     <AlertCircle size={14} />
                     Not a diagnosis. For educational purposes only.
                   </div>
-                  <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.875rem', color: '#374151', lineHeight: 1.7 }}>
+                  <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.875rem', color: 'var(--gray-700)', lineHeight: 1.7 }}>
                     {symptomResult}
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="card" style={{ padding: '2rem', textAlign: 'center', color: '#9ca3af' }}>
+              <div className="card" style={{ padding: '2rem', textAlign: 'center', color: 'var(--gray-400)' }}>
                 <Sparkles size={40} style={{ opacity: 0.3, margin: '0 auto 1rem' }} />
-                <p style={{ color: '#6b7280', fontWeight: 500 }}>Enter a symptom to get guidance</p>
+                <p style={{ color: 'var(--gray-500)', fontWeight: 500 }}>Enter a symptom to get guidance</p>
                 <p style={{ fontSize: '0.8rem' }}>Examples: Fatigue, Headache, Nausea, Back pain</p>
               </div>
             )}

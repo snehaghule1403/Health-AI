@@ -91,11 +91,11 @@ export default function EmergencyProfile() {
         </span>
       </div>
 
-      <div style={{ background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 12, padding: '1rem 1.25rem', marginBottom: '1.5rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+      <div style={{ background: 'var(--red-light)', border: '1px solid var(--red-border)', borderRadius: 12, padding: '1rem 1.25rem', marginBottom: '1.5rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
         <AlertCircle size={20} color="#dc2626" style={{ flexShrink: 0, marginTop: 2 }} aria-hidden />
         <div>
-          <p style={{ fontWeight: 600, color: '#991b1b', marginBottom: '0.15rem' }}>Emergency Information</p>
-          <p style={{ fontSize: '0.85rem', color: '#dc2626' }}>
+          <p style={{ fontWeight: 600, color: 'var(--red-ink)', marginBottom: '0.15rem' }}>Emergency Information</p>
+          <p style={{ fontSize: '0.85rem', color: 'var(--red)' }}>
             Only the fields on this page are visible through your QR code. Your medical records are never shown on the emergency page.
           </p>
         </div>
@@ -137,24 +137,24 @@ export default function EmergencyProfile() {
 
         <div>
           <div className="card" style={{ padding: '1.5rem', textAlign: 'center', position: 'sticky', top: '1rem' }}>
-            <h3 style={{ fontWeight: 600, color: '#1f2937', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+            <h3 style={{ fontWeight: 600, color: 'var(--gray-800)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
               <QrCode size={20} aria-hidden /> Emergency QR Code
             </h3>
             {link && qrUrl ? (
               <>
                 <img src={qrUrl} alt="Emergency profile QR code" width={200} height={200} style={{ margin: '0.75rem auto', display: 'block' }} />
-                <p style={{ fontSize: '0.75rem', color: '#6b7280', wordBreak: 'break-all', marginBottom: '1rem' }}>
+                <p style={{ fontSize: '0.75rem', color: 'var(--gray-500)', wordBreak: 'break-all', marginBottom: '1rem' }}>
                   <a href={link} target="_blank" rel="noopener noreferrer">Open emergency page</a>
                 </p>
                 <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                   <a className="btn btn-outline btn-sm" href={qrUrl} download="healthai-emergency-qr.png">Download QR</a>
                   <button className="btn btn-outline btn-sm" disabled={qrBusy} onClick={() => toggleAccess(true)}><RefreshCw size={13} /> Regenerate</button>
-                  <button className="btn btn-sm" style={{ background: '#fee2e2', color: '#dc2626', border: 'none' }} disabled={qrBusy} onClick={() => toggleAccess(false)}>Disable</button>
+                  <button className="btn btn-sm" style={{ background: 'var(--red-light)', color: 'var(--red)', border: 'none' }} disabled={qrBusy} onClick={() => toggleAccess(false)}>Disable</button>
                 </div>
               </>
             ) : (
               <>
-                <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: '1rem 0' }}>
+                <p style={{ fontSize: '0.85rem', color: 'var(--gray-500)', margin: '1rem 0' }}>
                   Emergency QR sharing is off. Turn it on to create a QR code for your phone lock screen or wallet card.
                 </p>
                 <button className="btn btn-primary" disabled={qrBusy} onClick={() => toggleAccess(true)}>
@@ -167,7 +167,7 @@ export default function EmergencyProfile() {
                 You are on a test or preview site. The QR still points to {PUBLIC_SITE_URL}, which only works once this version is live there.
               </div>
             )}
-            <div style={{ background: '#f9fafb', borderRadius: 8, padding: '0.75rem', fontSize: '0.75rem', color: '#4b5563', marginTop: '1.25rem', textAlign: 'left', lineHeight: 1.6 }}>
+            <div style={{ background: 'var(--gray-50)', borderRadius: 8, padding: '0.75rem', fontSize: '0.75rem', color: 'var(--gray-600)', marginTop: '1.25rem', textAlign: 'left', lineHeight: 1.6 }}>
               The QR contains only a link with a long random code. Anyone who scans it can see the emergency fields above, without signing in — that is intentional for first responders. Regenerate or disable it at any time if the QR is lost.
             </div>
           </div>

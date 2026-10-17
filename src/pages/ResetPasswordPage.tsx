@@ -30,11 +30,11 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', background: 'linear-gradient(135deg, var(--primary-light) 0%, var(--primary-light) 100%)' }}>
       <div className="card" style={{ width: '100%', maxWidth: 420, padding: '2rem' }}>
         <h1 style={{ fontSize: '1.4rem', marginBottom: '1rem' }}>Set a new password</h1>
         {hasSession === false && !status?.ok && (
-          <p role="alert" style={{ color: '#991b1b' }}>This reset link is invalid or has expired. Request a new one from the login page.</p>
+          <p role="alert" style={{ color: 'var(--red-ink)' }}>This reset link is invalid or has expired. Request a new one from the login page.</p>
         )}
         {hasSession && !status?.ok && (
           <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -45,7 +45,7 @@ export default function ResetPasswordPage() {
             <button className="btn btn-primary" disabled={saving}>{saving ? 'Saving…' : 'Update password'}</button>
           </form>
         )}
-        {status && <p role="status" style={{ marginTop: '0.75rem', color: status.ok ? '#166534' : '#991b1b' }}>{status.msg}</p>}
+        {status && <p role="status" style={{ marginTop: '0.75rem', color: status.ok ? 'var(--green-ink)' : '#991b1b' }}>{status.msg}</p>}
         <button className="btn btn-outline" style={{ marginTop: '1rem' }} onClick={() => navigate('/')}>Back to home</button>
       </div>
     </div>

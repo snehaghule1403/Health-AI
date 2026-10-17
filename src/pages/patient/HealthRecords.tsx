@@ -184,7 +184,7 @@ export default function HealthRecords() {
       {/* Filters */}
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
         <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
-          <Search size={16} aria-hidden style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+          <Search size={16} aria-hidden style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--gray-400)' }} />
           <label htmlFor="rec-search" className="sr-only">Search records</label>
           <input
             id="rec-search"
@@ -200,7 +200,7 @@ export default function HealthRecords() {
             <option value="All">All Types</option>
             {RECORD_TYPES.map(t => <option key={t}>{t}</option>)}
           </select>
-          <ChevronDown size={14} aria-hidden style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#6b7280' }} />
+          <ChevronDown size={14} aria-hidden style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--gray-500)' }} />
         </div>
         <label className="sr-only" htmlFor="rec-from">From date</label>
         <input id="rec-from" type="date" value={fromDate} onChange={e => resetPage(setFromDate)(e.target.value)} style={{ width: 'auto' }} title="From date" />
@@ -215,7 +215,7 @@ export default function HealthRecords() {
         </select>
       </div>
 
-      <p style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.75rem' }} aria-live="polite">
+      <p style={{ fontSize: '0.8rem', color: 'var(--gray-500)', marginBottom: '0.75rem' }} aria-live="polite">
         {filtered.length} record{filtered.length === 1 ? '' : 's'}
       </p>
 
@@ -236,11 +236,11 @@ export default function HealthRecords() {
               <div key={record.id} className="card" style={{ padding: '1.25rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem', gap: '0.5rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-                    <div style={{ width: 42, height: 42, borderRadius: 10, background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <div style={{ width: 42, height: 42, borderRadius: 10, background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <FileText size={20} color="#2563eb" />
                     </div>
                     <div style={{ minWidth: 0 }}>
-                      <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#1f2937', overflowWrap: 'anywhere' }}>{record.name}</h3>
+                      <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--gray-800)', overflowWrap: 'anywhere' }}>{record.name}</h3>
                       <span className={`badge ${badgeClass(record.type)}`} style={{ marginTop: '0.2rem' }}>{record.type}</span>
                     </div>
                   </div>
@@ -251,12 +251,12 @@ export default function HealthRecords() {
                   </div>
                 </div>
 
-                <div style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '1rem', lineHeight: 1.6 }}>
+                <div style={{ fontSize: '0.8rem', color: 'var(--gray-500)', marginBottom: '1rem', lineHeight: 1.6 }}>
                   <div>📅 {record.date}</div>
                   <div>🏥 {record.hospital || 'Not specified'}</div>
                   {record.doctor && <div>👨‍⚕️ {record.doctor}</div>}
                   {record.fileName && <div>📎 {record.fileName}</div>}
-                  {record.notes && <div style={{ marginTop: '0.25rem', color: '#9ca3af' }}>📝 {record.notes}</div>}
+                  {record.notes && <div style={{ marginTop: '0.25rem', color: 'var(--gray-400)' }}>📝 {record.notes}</div>}
                 </div>
 
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -266,12 +266,12 @@ export default function HealthRecords() {
                   <button className="btn btn-secondary btn-sm" onClick={() => handleOCR(record)}>
                     <Scan size={13} /> OCR Extract
                   </button>
-                  <button className="btn btn-sm" style={{ background: '#ede9fe', color: '#7c3aed', border: 'none' }} onClick={() => handleAnalyze(record)}>
+                  <button className="btn btn-sm" style={{ background: 'var(--violet-light)', color: 'var(--violet)', border: 'none' }} onClick={() => handleAnalyze(record)}>
                     <Brain size={13} /> AI Analyze
                   </button>
                   <button
                     className="btn btn-sm"
-                    style={{ background: '#fee2e2', color: '#dc2626', border: 'none', marginLeft: 'auto' }}
+                    style={{ background: 'var(--red-light)', color: 'var(--red)', border: 'none', marginLeft: 'auto' }}
                     onClick={() => setConfirmDelete(record)}
                     aria-label={`Delete ${record.name}`}
                   >
@@ -338,12 +338,12 @@ export default function HealthRecords() {
                 onDragOver={e => e.preventDefault()}
                 onDrop={e => { e.preventDefault(); pickFile(e.dataTransfer.files[0] ?? null); }}
                 style={{
-                  display: 'block', border: '2px dashed #d1d5db', borderRadius: 10, padding: '1.5rem',
-                  textAlign: 'center', color: '#9ca3af', background: '#f9fafb', cursor: 'pointer'
+                  display: 'block', border: '2px dashed var(--gray-300)', borderRadius: 10, padding: '1.5rem',
+                  textAlign: 'center', color: 'var(--gray-400)', background: 'var(--gray-50)', cursor: 'pointer'
                 }}
               >
                 <Upload size={28} style={{ margin: '0 auto 0.5rem' }} aria-hidden />
-                <p style={{ fontWeight: 500, color: '#6b7280' }}>{file ? file.name : 'Click to upload or drag & drop'}</p>
+                <p style={{ fontWeight: 500, color: 'var(--gray-500)' }}>{file ? file.name : 'Click to upload or drag & drop'}</p>
                 <p style={{ fontSize: '0.75rem' }}>{file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : 'PDF, JPG, PNG — up to 10 MB. Stored privately.'}</p>
                 <input id="f-file" type="file" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg"
                   className="sr-only" onChange={e => pickFile(e.target.files?.[0] ?? null)} />
@@ -377,9 +377,9 @@ export default function HealthRecords() {
                   { label: 'Hospital', value: viewRecord.hospital || 'N/A' },
                   { label: 'Doctor', value: viewRecord.doctor || 'N/A' },
                 ].map(({ label, value }) => (
-                  <div key={label} style={{ background: '#f9fafb', borderRadius: 8, padding: '0.75rem' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#9ca3af', fontWeight: 600, marginBottom: '0.2rem' }}>{label}</div>
-                    <div style={{ fontSize: '0.875rem', color: '#1f2937', fontWeight: 500 }}>{value}</div>
+                  <div key={label} style={{ background: 'var(--gray-50)', borderRadius: 8, padding: '0.75rem' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--gray-400)', fontWeight: 600, marginBottom: '0.2rem' }}>{label}</div>
+                    <div style={{ fontSize: '0.875rem', color: 'var(--gray-800)', fontWeight: 500 }}>{value}</div>
                   </div>
                 ))}
               </div>
@@ -391,22 +391,22 @@ export default function HealthRecords() {
                   <button className="btn btn-outline btn-sm" disabled={busyId === viewRecord.id} onClick={() => openFile(viewRecord, true)}>
                     <Download size={13} /> Download
                   </button>
-                  <span style={{ fontSize: '0.75rem', color: '#9ca3af', alignSelf: 'center' }}>Links expire after 5 minutes.</span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--gray-400)', alignSelf: 'center' }}>Links expire after 5 minutes.</span>
                 </div>
               ) : (
-                <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginBottom: '1rem' }}>No file attached to this record.</p>
+                <p style={{ fontSize: '0.8rem', color: 'var(--gray-400)', marginBottom: '1rem' }}>No file attached to this record.</p>
               )}
               {viewRecord.notes && (
-                <div style={{ background: '#f9fafb', borderRadius: 8, padding: '0.75rem', marginBottom: '1rem' }}>
-                  <div style={{ fontSize: '0.75rem', color: '#9ca3af', fontWeight: 600, marginBottom: '0.2rem' }}>Notes</div>
-                  <p style={{ fontSize: '0.875rem', color: '#374151' }}>{viewRecord.notes}</p>
+                <div style={{ background: 'var(--gray-50)', borderRadius: 8, padding: '0.75rem', marginBottom: '1rem' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--gray-400)', fontWeight: 600, marginBottom: '0.2rem' }}>Notes</div>
+                  <p style={{ fontSize: '0.875rem', color: 'var(--gray-700)' }}>{viewRecord.notes}</p>
                 </div>
               )}
               {viewRecord.extractedText && (
                 <div>
-                  <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#374151', marginBottom: '0.5rem' }}>Extracted Text (OCR)</h4>
+                  <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--gray-700)', marginBottom: '0.5rem' }}>Extracted Text (OCR)</h4>
                   <pre style={{
-                    background: '#1f2937', color: '#f9fafb', padding: '1rem',
+                    background: 'var(--gray-800)', color: 'var(--gray-50)', padding: '1rem',
                     borderRadius: 8, fontSize: '0.78rem', whiteSpace: 'pre-wrap',
                     fontFamily: 'monospace', lineHeight: 1.6, maxHeight: 280, overflowY: 'auto'
                   }}>{viewRecord.extractedText}</pre>
@@ -439,8 +439,8 @@ export default function HealthRecords() {
               {ocrProgress ? (
                 <div style={{ textAlign: 'center', padding: '2rem' }} role="status">
                   <Loader size={32} color="#2563eb" className="spin" style={{ margin: '0 auto 1rem' }} />
-                  <p style={{ color: '#6b7280' }}>{ocrProgress}…</p>
-                  <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '0.5rem' }}>
+                  <p style={{ color: 'var(--gray-500)' }}>{ocrProgress}…</p>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--gray-400)', marginTop: '0.5rem' }}>
                     Processing happens in your browser. Large scans can take a minute.
                   </p>
                 </div>
@@ -493,7 +493,7 @@ export default function HealthRecords() {
               {analyzeLoading ? (
                 <div style={{ textAlign: 'center', padding: '2rem' }} role="status">
                   <Loader size={32} color="#7c3aed" className="spin" style={{ margin: '0 auto 1rem' }} />
-                  <p style={{ color: '#6b7280' }}>Analyzing your report with AI...</p>
+                  <p style={{ color: 'var(--gray-500)' }}>Analyzing your report with AI...</p>
                 </div>
               ) : analyzeError ? (
                 <div className="alert alert-danger" role="alert"><AlertCircle size={16} /> {analyzeError}</div>
@@ -523,7 +523,7 @@ export default function HealthRecords() {
             </div>
             <div className="modal-footer">
               <button className="btn btn-outline" onClick={() => setConfirmDelete(null)}>Cancel</button>
-              <button className="btn" style={{ background: '#dc2626', color: 'white' }} disabled={busyId === confirmDelete.id} onClick={doDelete}>
+              <button className="btn" style={{ background: 'var(--red)', color: 'white' }} disabled={busyId === confirmDelete.id} onClick={doDelete}>
                 {busyId === confirmDelete.id ? 'Deleting…' : 'Delete'}
               </button>
             </div>

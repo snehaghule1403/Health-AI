@@ -5,10 +5,10 @@ import type { AIAnalysis } from '../types';
 // report text by the model; the explanation sections are AI interpretation.
 export default function AIAnalysisView({ analysis }: { analysis: AIAnalysis }) {
   const statusColor = (s: string) => {
-    if (s === 'normal') return { bg: '#dcfce7', color: '#166534' };
-    if (s === 'low') return { bg: '#dbeafe', color: '#1e40af' };
-    if (s === 'high') return { bg: '#fee2e2', color: '#991b1b' };
-    return { bg: '#f3f4f6', color: '#374151' };
+    if (s === 'normal') return { bg: 'var(--green-light)', color: 'var(--green-ink)' };
+    if (s === 'low') return { bg: 'var(--primary-light)', color: 'var(--primary-ink)' };
+    if (s === 'high') return { bg: 'var(--red-light)', color: 'var(--red-ink)' };
+    return { bg: '#f3f4f6', color: 'var(--gray-700)' };
   };
 
   return (
@@ -19,14 +19,14 @@ export default function AIAnalysisView({ analysis }: { analysis: AIAnalysis }) {
       </div>
 
       <section style={{ marginBottom: '1.25rem' }}>
-        <h4 style={{ fontWeight: 600, color: '#1f2937', marginBottom: '0.5rem' }}>📋 Report Summary <small style={{ color: '#7c3aed', fontWeight: 500 }}>(AI interpretation)</small></h4>
-        <p style={{ fontSize: '0.9rem', color: '#374151', lineHeight: 1.6 }}>{analysis.summary}</p>
+        <h4 style={{ fontWeight: 600, color: 'var(--gray-800)', marginBottom: '0.5rem' }}>📋 Report Summary <small style={{ color: 'var(--violet)', fontWeight: 500 }}>(AI interpretation)</small></h4>
+        <p style={{ fontSize: '0.9rem', color: 'var(--gray-700)', lineHeight: 1.6 }}>{analysis.summary}</p>
       </section>
 
       <section style={{ marginBottom: '1.25rem' }}>
-        <h4 style={{ fontWeight: 600, color: '#1f2937', marginBottom: '0.75rem' }}>📊 Values found in the report</h4>
+        <h4 style={{ fontWeight: 600, color: 'var(--gray-800)', marginBottom: '0.75rem' }}>📊 Values found in the report</h4>
         {analysis.importantValues.length === 0 ? (
-          <p style={{ fontSize: '0.85rem', color: '#6b7280' }}>No numeric values were identified in the extracted text.</p>
+          <p style={{ fontSize: '0.85rem', color: 'var(--gray-500)' }}>No numeric values were identified in the extracted text.</p>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.6rem' }}>
             {analysis.importantValues.map((v, i) => {
@@ -48,9 +48,9 @@ export default function AIAnalysisView({ analysis }: { analysis: AIAnalysis }) {
 
       {analysis.keyFindings.length > 0 && (
         <section style={{ marginBottom: '1.25rem' }}>
-          <h4 style={{ fontWeight: 600, color: '#1f2937', marginBottom: '0.5rem' }}>🔍 Key Findings</h4>
+          <h4 style={{ fontWeight: 600, color: 'var(--gray-800)', marginBottom: '0.5rem' }}>🔍 Key Findings</h4>
           {analysis.keyFindings.map((f, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.4rem', fontSize: '0.875rem', color: '#374151' }}>
+            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.4rem', fontSize: '0.875rem', color: 'var(--gray-700)' }}>
               <CheckCircle size={14} color="#16a34a" style={{ marginTop: 3, flexShrink: 0 }} aria-hidden />
               {f}
             </div>
@@ -59,16 +59,16 @@ export default function AIAnalysisView({ analysis }: { analysis: AIAnalysis }) {
       )}
 
       <section style={{ marginBottom: '1.25rem' }}>
-        <h4 style={{ fontWeight: 600, color: '#1f2937', marginBottom: '0.5rem' }}>💬 Simple Explanation</h4>
-        <div style={{ background: '#f9fafb', borderRadius: 8, padding: '0.85rem', fontSize: '0.875rem', color: '#374151', lineHeight: 1.6 }}>
+        <h4 style={{ fontWeight: 600, color: 'var(--gray-800)', marginBottom: '0.5rem' }}>💬 Simple Explanation</h4>
+        <div style={{ background: 'var(--gray-50)', borderRadius: 8, padding: '0.85rem', fontSize: '0.875rem', color: 'var(--gray-700)', lineHeight: 1.6 }}>
           {analysis.simpleExplanation}
         </div>
       </section>
 
       {!!analysis.missingOrUncertain?.length && (
         <section style={{ marginBottom: '1.25rem' }}>
-          <h4 style={{ fontWeight: 600, color: '#1f2937', marginBottom: '0.5rem' }}>⚠️ Missing or uncertain</h4>
-          <ul style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', color: '#374151' }}>
+          <h4 style={{ fontWeight: 600, color: 'var(--gray-800)', marginBottom: '0.5rem' }}>⚠️ Missing or uncertain</h4>
+          <ul style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', color: 'var(--gray-700)' }}>
             {analysis.missingOrUncertain.map((m, i) => <li key={i}>{m}</li>)}
           </ul>
         </section>
@@ -76,17 +76,17 @@ export default function AIAnalysisView({ analysis }: { analysis: AIAnalysis }) {
 
       {analysis.questionsForDoctor.length > 0 && (
         <section>
-          <h4 style={{ fontWeight: 600, color: '#1f2937', marginBottom: '0.5rem' }}>🩺 Questions to Ask Your Doctor</h4>
+          <h4 style={{ fontWeight: 600, color: 'var(--gray-800)', marginBottom: '0.5rem' }}>🩺 Questions to Ask Your Doctor</h4>
           {analysis.questionsForDoctor.map((q, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.4rem', fontSize: '0.875rem', color: '#374151' }}>
-              <span style={{ color: '#2563eb', fontWeight: 700, flexShrink: 0 }}>Q{i + 1}.</span>
+            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.4rem', fontSize: '0.875rem', color: 'var(--gray-700)' }}>
+              <span style={{ color: 'var(--primary)', fontWeight: 700, flexShrink: 0 }}>Q{i + 1}.</span>
               {q}
             </div>
           ))}
         </section>
       )}
 
-      <p style={{ fontSize: '0.72rem', color: '#9ca3af', marginTop: '1rem' }}>
+      <p style={{ fontSize: '0.72rem', color: 'var(--gray-400)', marginTop: '1rem' }}>
         Generated {new Date(analysis.generatedAt).toLocaleString()}{analysis.model ? ` by ${analysis.model}` : ''}.
       </p>
     </div>

@@ -28,9 +28,9 @@ export default function DoctorReports() {
 
       {authorizedRecords.length === 0 ? (
         <div className="card" style={{ padding: '3rem', textAlign: 'center' }}>
-          <Lock size={48} style={{ opacity: 0.3, margin: '0 auto 1rem', color: '#9ca3af' }} />
-          <h3 style={{ color: '#6b7280', marginBottom: '0.5rem' }}>No authorized records</h3>
-          <p style={{ color: '#9ca3af' }}>Access patient reports after patients grant you consent</p>
+          <Lock size={48} style={{ opacity: 0.3, margin: '0 auto 1rem', color: 'var(--gray-400)' }} />
+          <h3 style={{ color: 'var(--gray-500)', marginBottom: '0.5rem' }}>No authorized records</h3>
+          <p style={{ color: 'var(--gray-400)' }}>Access patient reports after patients grant you consent</p>
         </div>
       ) : (
         <div className="card">
@@ -59,11 +59,11 @@ export default function DoctorReports() {
                       <span className="badge badge-blue" style={{ fontSize: '0.7rem' }}>{record.type}</span>
                     </td>
                     <td>{record.date}</td>
-                    <td style={{ color: '#6b7280' }}>{record.hospital || '—'}</td>
+                    <td style={{ color: 'var(--gray-500)' }}>{record.hospital || '—'}</td>
                     <td>
                       {record.aiAnalysis
                         ? <span className="badge badge-green" style={{ fontSize: '0.7rem' }}><CheckCircle size={9} /> Done</span>
-                        : <span style={{ color: '#9ca3af', fontSize: '0.75rem' }}>—</span>
+                        : <span style={{ color: 'var(--gray-400)', fontSize: '0.75rem' }}>—</span>
                       }
                     </td>
                     <td>
@@ -100,38 +100,38 @@ export default function DoctorReports() {
                   { label: 'Date', value: viewRecord.date },
                   { label: 'Hospital', value: viewRecord.hospital || 'N/A' },
                 ].map(({ label, value }) => (
-                  <div key={label} style={{ background: '#f9fafb', borderRadius: 8, padding: '0.75rem' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#9ca3af', fontWeight: 600 }}>{label}</div>
-                    <div style={{ fontSize: '0.875rem', color: '#1f2937', fontWeight: 500 }}>{value}</div>
+                  <div key={label} style={{ background: 'var(--gray-50)', borderRadius: 8, padding: '0.75rem' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--gray-400)', fontWeight: 600 }}>{label}</div>
+                    <div style={{ fontSize: '0.875rem', color: 'var(--gray-800)', fontWeight: 500 }}>{value}</div>
                   </div>
                 ))}
               </div>
 
               {viewRecord.extractedText && (
                 <div style={{ marginBottom: '1rem' }}>
-                  <h4 style={{ fontWeight: 600, fontSize: '0.875rem', color: '#374151', marginBottom: '0.5rem' }}>Report Content</h4>
-                  <pre style={{ background: '#1f2937', color: '#f9fafb', padding: '1rem', borderRadius: 8, fontSize: '0.78rem', whiteSpace: 'pre-wrap', maxHeight: 220, overflowY: 'auto', fontFamily: 'monospace' }}>
+                  <h4 style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--gray-700)', marginBottom: '0.5rem' }}>Report Content</h4>
+                  <pre style={{ background: 'var(--gray-800)', color: 'var(--gray-50)', padding: '1rem', borderRadius: 8, fontSize: '0.78rem', whiteSpace: 'pre-wrap', maxHeight: 220, overflowY: 'auto', fontFamily: 'monospace' }}>
                     {viewRecord.extractedText}
                   </pre>
                 </div>
               )}
 
               {viewRecord.aiAnalysis && (
-                <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 8, padding: '1rem' }}>
-                  <h4 style={{ fontWeight: 600, color: '#166534', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+                <div style={{ background: 'var(--green-light)', border: '1px solid var(--green-border)', borderRadius: 8, padding: '1rem' }}>
+                  <h4 style={{ fontWeight: 600, color: 'var(--green-ink)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
                     <Brain size={14} /> AI Analysis Summary
                   </h4>
-                  <p style={{ fontSize: '0.85rem', color: '#374151', marginBottom: '0.75rem' }}>{viewRecord.aiAnalysis.summary}</p>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--gray-700)', marginBottom: '0.75rem' }}>{viewRecord.aiAnalysis.summary}</p>
                   <div style={{ marginBottom: '0.75rem' }}>
-                    <h5 style={{ fontWeight: 600, fontSize: '0.8rem', color: '#166534', marginBottom: '0.4rem' }}>Key Findings:</h5>
+                    <h5 style={{ fontWeight: 600, fontSize: '0.8rem', color: 'var(--green-ink)', marginBottom: '0.4rem' }}>Key Findings:</h5>
                     {viewRecord.aiAnalysis.keyFindings.map((f, i) => (
-                      <div key={i} style={{ display: 'flex', gap: '0.4rem', fontSize: '0.8rem', color: '#374151', marginBottom: '0.2rem' }}>
+                      <div key={i} style={{ display: 'flex', gap: '0.4rem', fontSize: '0.8rem', color: 'var(--gray-700)', marginBottom: '0.2rem' }}>
                         <CheckCircle size={12} color="#16a34a" style={{ flexShrink: 0, marginTop: 2 }} />
                         {f}
                       </div>
                     ))}
                   </div>
-                  <div style={{ padding: '0.75rem', background: '#fef9c3', borderRadius: 6, fontSize: '0.75rem', color: '#713f12' }}>
+                  <div style={{ padding: '0.75rem', background: 'var(--yellow-light)', borderRadius: 6, fontSize: '0.75rem', color: 'var(--yellow-ink)' }}>
                     <AlertCircle size={12} style={{ display: 'inline', marginRight: 4 }} />
                     {viewRecord.aiAnalysis.disclaimer}
                   </div>

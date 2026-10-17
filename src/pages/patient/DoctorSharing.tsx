@@ -94,12 +94,12 @@ export default function DoctorSharing() {
             placeholder="Name, email, hospital or specialization"
           />
           <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: 320, overflowY: 'auto' }}>
-            {doctorMatches.length === 0 && <p style={{ fontSize: '0.85rem', color: '#9ca3af' }}>No matching verified doctors.</p>}
+            {doctorMatches.length === 0 && <p style={{ fontSize: '0.85rem', color: 'var(--gray-400)' }}>No matching verified doctors.</p>}
             {doctorMatches.map(d => (
-              <div key={d.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.75rem', border: '1px solid #e5e7eb', borderRadius: 8, flexWrap: 'wrap' }}>
+              <div key={d.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.75rem', border: '1px solid var(--gray-200)', borderRadius: 8, flexWrap: 'wrap' }}>
                 <div>
                   <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{d.name}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>{[d.specialization, d.hospital].filter(Boolean).join(' · ') || d.email}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--gray-500)' }}>{[d.specialization, d.hospital].filter(Boolean).join(' · ') || d.email}</div>
                 </div>
                 <button className="btn btn-success btn-sm" disabled={busy} onClick={() => handleRequest(d.id)}>
                   <CheckCircle size={13} /> Grant Access
@@ -125,15 +125,15 @@ export default function DoctorSharing() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                   <div style={{
-                    width: 48, height: 48, borderRadius: '50%', background: '#dcfce7',
+                    width: 48, height: 48, borderRadius: '50%', background: 'var(--green-light)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontWeight: 700, color: '#16a34a', fontSize: '0.9rem'
+                    fontWeight: 700, color: 'var(--green)', fontSize: '0.9rem'
                   }}>
                     {consent.doctorName.split(' ').slice(-1)[0].slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <h3 style={{ fontWeight: 600, color: '#1f2937', fontSize: '1rem' }}>{consent.doctorName}</h3>
-                    <p style={{ fontSize: '0.8rem', color: '#6b7280' }}>
+                    <h3 style={{ fontWeight: 600, color: 'var(--gray-800)', fontSize: '1rem' }}>{consent.doctorName}</h3>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--gray-500)' }}>
                       {consent.hospital} · {consent.accessType}
                     </p>
                   </div>
@@ -156,8 +156,8 @@ export default function DoctorSharing() {
               </div>
 
               {/* History */}
-              <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: '0.75rem' }}>
-                <h4 style={{ fontSize: '0.78rem', fontWeight: 600, color: '#9ca3af', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <div style={{ borderTop: '1px solid var(--gray-100)', paddingTop: '0.75rem' }}>
+                <h4 style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--gray-400)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   <History size={12} /> ACCESS HISTORY
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
@@ -167,8 +167,8 @@ export default function DoctorSharing() {
                         width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
                         background: h.action.includes('granted') ? '#16a34a' : h.action.includes('revoked') ? '#dc2626' : '#6b7280'
                       }} />
-                      <span style={{ color: '#374151' }}>{h.action}</span>
-                      <span style={{ color: '#9ca3af' }}>
+                      <span style={{ color: 'var(--gray-700)' }}>{h.action}</span>
+                      <span style={{ color: 'var(--gray-400)' }}>
                         {new Date(h.timestamp).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
@@ -181,14 +181,14 @@ export default function DoctorSharing() {
       )}
 
       {/* Info card */}
-      <div className="card" style={{ padding: '1.25rem', marginTop: '1.5rem', background: '#f0fdf4', border: '1px solid #86efac' }}>
+      <div className="card" style={{ padding: '1.25rem', marginTop: '1.5rem', background: 'var(--green-light)', border: '1px solid var(--green-border)' }}>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
           <AlertCircle size={18} color="#16a34a" style={{ flexShrink: 0, marginTop: 2 }} />
           <div>
-            <h4 style={{ fontWeight: 600, color: '#166534', marginBottom: '0.25rem', fontSize: '0.9rem' }}>
+            <h4 style={{ fontWeight: 600, color: 'var(--green-ink)', marginBottom: '0.25rem', fontSize: '0.9rem' }}>
               About Consent-Based Sharing
             </h4>
-            <p style={{ fontSize: '0.825rem', color: '#16a34a', lineHeight: 1.6 }}>
+            <p style={{ fontSize: '0.825rem', color: 'var(--green)', lineHeight: 1.6 }}>
               When you grant access to a doctor, they can view your medical records, AI summaries, and health trends.
               When you revoke access, the doctor immediately loses the ability to view your data.
               You can grant access again at any time.

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import Sidebar from './components/Sidebar';
+import AuroraFX from './components/AuroraFX';
 
 // Landing & Auth
 import LandingPage from './pages/LandingPage';
@@ -100,6 +101,7 @@ export default function App() {
   return (
     <AppProvider>
       <BrowserRouter>
+        <AuroraFX />
         {!supabaseConfigured && (
           <div role="alert" className="alert-banner" style={{ margin: 0, borderRadius: 0 }}>
             Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (see README) — sign-in and data are unavailable.

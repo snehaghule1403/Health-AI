@@ -22,23 +22,23 @@ export default function DoctorDashboard() {
 
   const statCards = [
     {
-      icon: <Users size={20} />, iconBg: '#dbeafe', iconColor: '#2563eb',
+      icon: <Users size={20} />, iconBg: 'var(--primary-light)', iconColor: 'var(--primary)',
       label: 'Authorized Patients', value: authorizedPatients.length, sub: 'Active consent'
     },
     {
-      icon: <FileText size={20} />, iconBg: '#dcfce7', iconColor: '#16a34a',
+      icon: <FileText size={20} />, iconBg: 'var(--green-light)', iconColor: 'var(--green)',
       label: 'Reports Available', value: records.filter(r =>
         grantedConsents.some(c => c.patientId === r.patientId)
       ).length, sub: 'Across all patients'
     },
     {
-      icon: <ShieldCheck size={20} />, iconBg: '#fef3c7', iconColor: '#d97706',
+      icon: <ShieldCheck size={20} />, iconBg: 'var(--yellow-light)', iconColor: 'var(--orange)',
       label: 'Revoked Access', value: consents.filter(c =>
         c.doctorId === currentUser?.id && c.status === 'revoked'
       ).length, sub: 'Patients who withdrew consent'
     },
     {
-      icon: <Activity size={20} />, iconBg: '#ede9fe', iconColor: '#7c3aed',
+      icon: <Activity size={20} />, iconBg: 'var(--violet-light)', iconColor: 'var(--violet)',
       label: 'AI Summaries', value: records.filter(r => r.aiAnalysis && grantedConsents.some(c => c.patientId === r.patientId)).length, sub: 'Reports with AI summary'
     },
   ];
@@ -48,10 +48,10 @@ export default function DoctorDashboard() {
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
 
-        <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#1f2937' }}>
+        <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--gray-800)' }}>
           {greeting}, {firstName} 👋
         </h1>
-        <p style={{ color: '#6b7280', marginTop: '0.25rem' }}>
+        <p style={{ color: 'var(--gray-500)', marginTop: '0.25rem' }}>
           {currentUser?.specialization ?? 'Doctor'} · {currentUser?.hospital || 'Hospital not set'}
         </p>
       </div>
@@ -98,24 +98,24 @@ export default function DoctorDashboard() {
                   key={patient.id}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '1rem 1.5rem', borderBottom: '1px solid #f3f4f6',
+                    padding: '1rem 1.5rem', borderBottom: '1px solid var(--gray-100)',
                     cursor: 'pointer'
                   }}
                   onClick={() => navigate(`/doctor/patients`)}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <div style={{
-                      width: 42, height: 42, borderRadius: '50%', background: '#dbeafe',
+                      width: 42, height: 42, borderRadius: '50%', background: 'var(--primary-light)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontWeight: 700, color: '#2563eb', fontSize: '0.9rem'
+                      fontWeight: 700, color: 'var(--primary)', fontSize: '0.9rem'
                     }}>
                       {patient.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                     </div>
                     <div>
-                      <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#1f2937' }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--gray-800)' }}>
                         {patient.name}
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--gray-500)' }}>
                         {patient.bloodGroup ?? 'N/A'} · {patientRecords.length} records
                         {patient.dateOfBirth && ` · Age: ${new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear()}`}
                       </div>
@@ -135,9 +135,9 @@ export default function DoctorDashboard() {
       {/* Quick Access */}
       <div className="grid-3" style={{ gap: '1rem' }}>
         {[
-          { icon: <Users size={20} />, title: 'Patient List', desc: 'View all authorized patients', path: '/doctor/patients', color: '#2563eb', bg: '#dbeafe' },
-          { icon: <FileText size={20} />, title: 'View Reports', desc: 'Access patient medical reports', path: '/doctor/reports', color: '#16a34a', bg: '#dcfce7' },
-          { icon: <TrendingUp size={20} />, title: 'Health Trends', desc: 'Monitor patient health metrics', path: '/doctor/trends', color: '#ea580c', bg: '#ffedd5' },
+          { icon: <Users size={20} />, title: 'Patient List', desc: 'View all authorized patients', path: '/doctor/patients', color: 'var(--primary)', bg: 'var(--primary-light)' },
+          { icon: <FileText size={20} />, title: 'View Reports', desc: 'Access patient medical reports', path: '/doctor/reports', color: 'var(--green)', bg: 'var(--green-light)' },
+          { icon: <TrendingUp size={20} />, title: 'Health Trends', desc: 'Monitor patient health metrics', path: '/doctor/trends', color: 'var(--orange)', bg: 'var(--orange-light)' },
         ].map((item, i) => (
           <div
             key={i}
@@ -152,10 +152,10 @@ export default function DoctorDashboard() {
             }}>
               {item.icon}
             </div>
-            <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#1f2937', marginBottom: '0.25rem' }}>
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--gray-800)', marginBottom: '0.25rem' }}>
               {item.title}
             </h3>
-            <p style={{ fontSize: '0.8rem', color: '#6b7280' }}>{item.desc}</p>
+            <p style={{ fontSize: '0.8rem', color: 'var(--gray-500)' }}>{item.desc}</p>
           </div>
         ))}
       </div>
