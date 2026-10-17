@@ -1,4 +1,4 @@
-import { route, authUser, rateLimit, callClaude, str, HttpError, SAFETY_RULES, DISCLAIMER } from '../_lib.js';
+import { route, authUser, rateLimit, callAI, str, HttpError, SAFETY_RULES, DISCLAIMER } from '../_lib.js';
 
 const SYSTEM = `You describe patterns in a patient's recorded health measurements.
 ${SAFETY_RULES}
@@ -17,6 +17,6 @@ export default route('POST', async (req) => {
   const measurements = (m ?? []).map(r => `${r.measured_on}, ${r.kind}, ${r.value}, ${r.unit}`).join('\n') || 'none';
   const wellness = (w ?? []).map(r => `${r.entry_date}, ${r.weight_kg ?? '-'}, ${r.sleep_hours}, ${r.exercise_minutes}, ${r.water_glasses}`).join('\n') || 'none';
   const prompt = `Measurements (date, kind, value, unit):\n${measurements}\n\nDaily wellness (date, weight kg, sleep h, exercise min, water glasses):\n${wellness}`;
-  const summary = await callClaude(SYSTEM, [{ role: 'user', content: prompt }], 700);
+  const summary = await callAI(SYSTEM, [{ role: 'user', content: prompt }], 700);
   return { summary, disclaimer: DISCLAIMER };
 });

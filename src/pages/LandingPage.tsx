@@ -260,7 +260,7 @@ export default function LandingPage() {
         <div className="lp-wrap">
           <div className="lp-ai" data-reveal>
             <div className="lp-brain"><Brain size={42} /></div>
-            <div className="lp-kicker">Powered by Claude</div>
+            <div className="lp-kicker">AI-powered</div>
             <h2 className="lp-h2">AI that speaks <span className="grad-text">human.</span></h2>
             <p className="lp-lead">Our AI translates complex medical language into insights you can actually understand.</p>
             <div className="lp-ai-grid">

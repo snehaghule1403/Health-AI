@@ -175,7 +175,7 @@ export default function Settings() {
               <p style={{ color: 'var(--red-ink)' }}><AlertCircle size={14} /> The API is not reachable. AI features are unavailable (on local <code>vite</code> dev, run <code>vercel dev</code> instead).</p>
             ) : (
               <>
-                <div>AI provider: {ai.ai ? <strong style={{ color: 'var(--green-ink)' }}>Connected ({ai.model})</strong> : <strong style={{ color: 'var(--red-ink)' }}>Not configured — ANTHROPIC_API_KEY missing</strong>}</div>
+                <div>AI provider: {ai.ai ? <strong style={{ color: 'var(--green-ink)' }}>Connected ({ai.model})</strong> : <strong style={{ color: 'var(--red-ink)' }}>Not configured — GROQ_API_KEY missing</strong>}</div>
                 <div>Server database access: {ai.supabase ? <strong style={{ color: 'var(--green-ink)' }}>Configured</strong> : <strong style={{ color: 'var(--red-ink)' }}>Missing Supabase env vars</strong>}</div>
               </>
             )}

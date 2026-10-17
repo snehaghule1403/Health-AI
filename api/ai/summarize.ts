@@ -1,4 +1,4 @@
-import { route, authUser, rateLimit, callClaude, parseJson, str, HttpError, SAFETY_RULES, DISCLAIMER, AI_MODEL } from '../_lib.js';
+import { route, authUser, rateLimit, callAI, parseJson, str, HttpError, SAFETY_RULES, DISCLAIMER, AI_MODEL } from '../_lib.js';
 
 const SYSTEM = `You summarise the text of a medical report for the patient in plain language.
 ${SAFETY_RULES}
@@ -18,7 +18,7 @@ export default route('POST', async (req) => {
   await rateLimit(db, userId, 'summarize');
 
   const prompt = `Report: ${record.name} (${record.type}, dated ${record.record_date})\n\n<report_text>\n${record.extracted_text.slice(0, 30000)}\n</report_text>`;
-  const raw = await callClaude(SYSTEM, [{ role: 'user', content: prompt }], 2000);
+  const raw = await callAI(SYSTEM, [{ role: 'user', content: prompt }], 2000);
   const parsed = parseJson<Record<string, unknown>>(raw);
   const list = (v: unknown) => (Array.isArray(v) ? v.map(String) : []);
   const analysis = {

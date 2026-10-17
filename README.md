@@ -2,7 +2,7 @@
 
 > Your Health. One Secure Place.
 
-A full-stack React + TypeScript app (Vite) for keeping personal health records. It uses Supabase for auth, the Postgres database and private file storage, and Vercel serverless functions for AI features (Anthropic Claude). OCR runs in the browser with Tesseract.js and pdf.js.
+A full-stack React + TypeScript app (Vite) for keeping personal health records. It uses Supabase for auth, the Postgres database and private file storage, and Vercel serverless functions for AI features (Groq, model openai/gpt-oss-120b). OCR runs in the browser with Tesseract.js and pdf.js.
 
 > **Educational project.** HealthAI is not a medical device. It has not been clinically validated or certified for regulatory compliance (HIPAA, DPDP, etc.), and AI output is never a diagnosis.
 
@@ -14,7 +14,7 @@ A full-stack React + TypeScript app (Vite) for keeping personal health records. 
 | Auth | Supabase Auth (email + password, password recovery) |
 | Database | Supabase Postgres with Row Level Security on every table |
 | Files | Private Supabase Storage bucket `medical-files`, 5-minute signed URLs |
-| AI | `/api/ai/*` Vercel functions calling the Anthropic Messages API (key stays on the server) |
+| AI | `/api/ai/*` Vercel functions calling the Groq chat-completions API (key stays on the server) |
 | OCR | Tesseract.js (images and scanned PDF pages) and pdf.js (text PDFs), both in the browser |
 | QR | `qrcode` library; the QR holds only a link with a revocable 256-bit token |
 
@@ -60,8 +60,8 @@ Copy `.env.example` to `.env.local`.
 |---|---|---|
 | `VITE_SUPABASE_URL` | `.env.local` and Vercel (all environments) | No |
 | `VITE_SUPABASE_ANON_KEY` | `.env.local` and Vercel | No (RLS protects data) |
-| `ANTHROPIC_API_KEY` | `.env.local` (for `vercel dev`) and Vercel only | **Yes** |
-| `ANTHROPIC_MODEL` | optional; defaults to `claude-sonnet-5-5` | No |
+| `GROQ_API_KEY` | `.env.local` (for `vercel dev`) and Vercel only | **Yes** |
+| `GROQ_MODEL` | optional; defaults to `openai/gpt-oss-120b` | No |
 | `AI_CALLS_PER_HOUR` | optional; defaults to 30 | No |
 | `SUPABASE_SERVICE_ROLE_KEY` | your shell, only when running `npm run seed`. **Never in Vercel or the frontend** | **Yes** |
 | `SEED_PASSWORD` | your shell, only for seeding | Yes |
@@ -83,7 +83,7 @@ This creates `doctor1..12@healthai.test` (verified) and `patient1..12@healthai.t
 
 ## 4. Deploy to Vercel
 1. Push this branch to GitHub and open a PR. The Vercel GitHub integration builds a **preview** deployment, and production stays untouched.
-2. In Vercel → Project → Settings → Environment Variables, add `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` and `ANTHROPIC_API_KEY` for Production and Preview.
+2. In Vercel → Project → Settings → Environment Variables, add `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` and `GROQ_API_KEY` for Production and Preview.
 3. Test the preview URL, then merge to `main` to update production.
 4. Add the preview domain pattern to the Supabase redirect URLs if you test password reset on previews.
 

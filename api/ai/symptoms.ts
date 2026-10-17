@@ -1,4 +1,4 @@
-import { route, authUser, rateLimit, callClaude, str, HttpError, SAFETY_RULES, DISCLAIMER } from '../_lib.js';
+import { route, authUser, rateLimit, callAI, str, HttpError, SAFETY_RULES, DISCLAIMER } from '../_lib.js';
 
 const SYSTEM = `You provide general educational information about symptoms a patient reports.
 ${SAFETY_RULES}
@@ -19,7 +19,7 @@ export default route('POST', async (req) => {
   await rateLimit(db, userId, 'symptoms');
 
   const prompt = `Symptom(s): ${symptom}\nDuration: ${duration || 'not given'}\nSeverity: ${severity}\nFrequency: ${frequency || 'not given'}\nOther context: ${notes || 'none'}`;
-  const reply = await callClaude(SYSTEM, [{ role: 'user', content: prompt }], 900);
+  const reply = await callAI(SYSTEM, [{ role: 'user', content: prompt }], 900);
   const { data, error } = await db.from('symptoms').insert({
     patient_id: userId, symptom, duration, severity, frequency, notes, ai_response: reply,
   }).select().single();

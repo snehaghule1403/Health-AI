@@ -1,4 +1,4 @@
-import { route, authUser, rateLimit, callClaude, str, HttpError, SAFETY_RULES, DISCLAIMER } from '../_lib.js';
+import { route, authUser, rateLimit, callAI, str, HttpError, SAFETY_RULES, DISCLAIMER } from '../_lib.js';
 
 const SYSTEM = `You answer general health and wellness questions for a patient using the HealthAI app.
 ${SAFETY_RULES}
@@ -25,7 +25,7 @@ export default route('POST', async (req) => {
 
   const system = `${SYSTEM}
 Write your whole reply in ${language}, in short, clear sentences that also read well aloud. You may add the English medical term in brackets. The "Follow-up:" label stays in English.`;
-  const reply = await callClaude(system, messages, 1000);
+  const reply = await callAI(system, messages, 1000);
   await db.from('chat_messages').insert([
     { patient_id: userId, role: 'user', content: message },
     { patient_id: userId, role: 'assistant', content: reply },
